@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Admin Login - CloudyBreeze</title>
+    <link rel="icon" href="../images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-login-page">
+
+    <main>
+        <div class="admin-login-container">
+            <div class="admin-login-card">
+                <div class="admin-login-header">
+                    <img src="../images/logo.png" alt="CloudyBreeze Logo" class="admin-login-logo">
+                    <h1 class="admin-login-title">Admin Panel</h1>
+                    <p class="admin-login-subtitle">Sign in to manage your store</p>
+                </div>
+
+                <form class="admin-login-form" id="loginForm" novalidate>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="form-input"
+                            placeholder="admin@cloudybreeze.com"
+                            required
+                            autocomplete="email"
+                            autofocus
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-input"
+                            placeholder="Enter your password"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+
+                    <div class="form-message error" id="loginMessage" style="display: none;"></div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-full" id="loginBtn">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="admin-login-footer">
+                    <a href="/" class="admin-login-back">← Back to Store</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ============================================================
+        // Admin Login Handler
+        // ============================================================
+        (function () {
+            'use strict';
+
+            var loginForm = document.getElementById('loginForm');
+            var loginBtn = document.getElementById('loginBtn');
+            var loginMessage = document.getElementById('loginMessage');
+
+            // Check if already logged in
+            checkAuth();
+
+            function checkAuth() {
+                var token = localStorage.getItem('cb_admin_token');
+                if (token) {
+                    // Verify token is still valid
+                    fetch('/api/admin/auth/verify', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token,
+                        },
+                    })
+                        .then(function (res) { return res.json(); })
+                        .then(function (result) {
+                            if (result.success && result.data && result.data.valid) {
+                                window.location.href = '/admin/dashboard.html';
+                            } else {
+                                // Token invalid, clear it
+                                localStorage.removeItem('cb_admin_token');
+                                localStorage.removeItem('cb_admin_user');
+                            }
+                        })
+                        .catch(function () {
+                            // Silently continue to login page
+                        });
+                }
+            }
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    var email = document.getElementById('email').value.trim();
+                    var password = document.getElementById('password').value;
+
+                    if (!email || !password) {
+                        showMessage('Please enter your email and password.', 'error');
+                        return;
+                    }
+
+                    setSubmitting(true);
+
+                    fetch('/api/admin/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, password: password }),
+                    })
+                        .then(function (res) { return res.json(); })
+                        .then(function (result) {
+                            setSubmitting(false);
+
+                            if (!result.success) {
+                                showMessage(
+                                    result.error ? result.error.message : 'Login failed. Please try again.',
+                                    'error'
+                                );
+                                return;
+                            }
+
+                            // Store token and user info
+                            var data = result.data;
+                            localStorage.setItem('cb_admin_token', data.access_token);
+                            localStorage.setItem('cb_admin_user', JSON.stringify(data.user));
+
+                            // Redirect to dashboard
+                            window.location.href = '/admin/dashboard.html';
+                        })
+                        .catch(function (err) {
+                            console.error('Login error:', err);
+                            setSubmitting(false);
+                            showMessage('Network error. Please try again.', 'error');
+                        });
+                });
+            }
+
+            function showMessage(message, type) {
+                if (!loginMessage) return;
+                loginMessage.textContent = message;
+                loginMessage.className = 'form-message ' + (type || 'error');
+                loginMessage.style.display = 'block';
+            }
+
+            function setSubmitting(isSubmitting) {
+                if (loginBtn) {
+                    loginBtn.disabled = isSubmitting;
+                    loginBtn.textContent = isSubmitting ? 'Signing In...' : 'Sign In';
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

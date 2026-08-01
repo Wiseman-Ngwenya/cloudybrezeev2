@@ -1,0 +1,645 @@
+/* ============================================================
+   CloudyBreeze E-Commerce System
+   Animations Stylesheet
+   ============================================================
+   Smooth, elegant animations for a premium feel.
+   All animations are performant (GPU-accelerated where possible)
+   and respect the prefers-reduced-motion media query.
+   ============================================================ */
+
+/* ============================================================
+   Keyframe Animations
+   ============================================================ */
+
+/* Spin - Used for loading spinners */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Fade In */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Fade In Up */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade In Down */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade In Left */
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Fade In Right */
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Scale In */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Slide Down - For dropdown menus and panels */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 1000px;
+    }
+}
+
+/* Slide Up */
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 1000px;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+}
+
+/* Pulse - For attention-grabbing elements */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Shimmer - For skeleton loading states */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Bounce - For cart icon when item is added */
+@keyframes bounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    30% {
+        transform: scale(1.3);
+    }
+    50% {
+        transform: scale(0.9);
+    }
+    70% {
+        transform: scale(1.1);
+    }
+}
+
+/* Checkmark Draw - For success animations */
+@keyframes checkmarkDraw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Float - Subtle floating animation for decorative elements */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Shake - For error states */
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    20% {
+        transform: translateX(-8px);
+    }
+    40% {
+        transform: translateX(8px);
+    }
+    60% {
+        transform: translateX(-4px);
+    }
+    80% {
+        transform: translateX(4px);
+    }
+}
+
+/* ============================================================
+   Animation Utility Classes
+   ============================================================ */
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.animate-fade-in-down {
+    animation: fadeInDown 0.4s ease forwards;
+}
+
+.animate-fade-in-left {
+    animation: fadeInLeft 0.5s ease forwards;
+}
+
+.animate-fade-in-right {
+    animation: fadeInRight 0.5s ease forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.4s ease forwards;
+}
+
+.animate-slide-down {
+    animation: slideDown 0.3s ease forwards;
+}
+
+.animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-bounce {
+    animation: bounce 0.5s ease;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease;
+}
+
+/* Animation Delays */
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+
+/* ============================================================
+   Page Load Animations
+   ============================================================ */
+
+/* Hero content entrance */
+.hero-content {
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.hero-title {
+    animation: fadeInUp 0.8s ease 0.2s forwards;
+    opacity: 0;
+}
+
+.hero-subtitle {
+    animation: fadeInUp 0.8s ease 0.4s forwards;
+    opacity: 0;
+}
+
+.hero-actions {
+    animation: fadeInUp 0.8s ease 0.6s forwards;
+    opacity: 0;
+}
+
+/* Product cards stagger animation */
+.product-card {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+
+.product-card:nth-child(1) { animation-delay: 0.1s; }
+.product-card:nth-child(2) { animation-delay: 0.2s; }
+.product-card:nth-child(3) { animation-delay: 0.3s; }
+.product-card:nth-child(4) { animation-delay: 0.4s; }
+.product-card:nth-child(5) { animation-delay: 0.5s; }
+.product-card:nth-child(6) { animation-delay: 0.6s; }
+.product-card:nth-child(7) { animation-delay: 0.7s; }
+.product-card:nth-child(8) { animation-delay: 0.8s; }
+
+/* Category cards stagger */
+.category-card {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+
+.category-card:nth-child(1) { animation-delay: 0.1s; }
+.category-card:nth-child(2) { animation-delay: 0.3s; }
+.category-card:nth-child(3) { animation-delay: 0.5s; }
+
+/* Benefit cards stagger */
+.benefit-card {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+
+.benefit-card:nth-child(1) { animation-delay: 0.1s; }
+.benefit-card:nth-child(2) { animation-delay: 0.2s; }
+.benefit-card:nth-child(3) { animation-delay: 0.3s; }
+.benefit-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Value cards stagger */
+.value-card {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+
+.value-card:nth-child(1) { animation-delay: 0.1s; }
+.value-card:nth-child(2) { animation-delay: 0.2s; }
+.value-card:nth-child(3) { animation-delay: 0.3s; }
+.value-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Section headers fade in */
+.section-header {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Page header fade in */
+.page-header {
+    animation: fadeInDown 0.5s ease forwards;
+}
+
+/* Product detail entrance */
+.product-detail-layout {
+    animation: fadeIn 0.6s ease forwards;
+}
+
+/* Checkout form entrance */
+.checkout-content {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* Order details card entrance */
+.order-details-card {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Contact form entrance */
+.contact-layout {
+    animation: fadeIn 0.6s ease forwards;
+}
+
+/* Policy content entrance */
+.policy-content {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* FAQ items stagger */
+.faq-item {
+    animation: fadeInLeft 0.4s ease forwards;
+    opacity: 0;
+}
+
+.faq-item:nth-child(1) { animation-delay: 0.1s; }
+.faq-item:nth-child(2) { animation-delay: 0.2s; }
+.faq-item:nth-child(3) { animation-delay: 0.3s; }
+.faq-item:nth-child(4) { animation-delay: 0.4s; }
+.faq-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* ============================================================
+   Interactive Animations
+   ============================================================ */
+
+/* Button hover effect */
+.btn {
+    transition: all 0.25s ease, transform 0.15s ease;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+/* Card hover lift */
+.product-card,
+.category-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Image zoom on card hover */
+.product-card-image img,
+.category-card-image img {
+    transition: transform 0.6s ease;
+}
+
+/* Navigation link hover */
+.nav-link {
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Form input focus */
+.form-input,
+.form-textarea,
+.form-select {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Filter option hover */
+.filter-option {
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Variant option selection */
+.variant-option {
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Payment option selection */
+.payment-option {
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* FAQ answer accordion */
+.faq-answer {
+    transition: max-height 0.4s ease, padding 0.4s ease;
+}
+
+.faq-chevron {
+    transition: transform 0.3s ease;
+}
+
+/* Cart count bounce on update */
+.cart-count.updating {
+    animation: bounce 0.5s ease;
+}
+
+/* Gallery thumbnail selection */
+.gallery-thumbnail {
+    transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.gallery-thumbnail:hover {
+    opacity: 0.8;
+}
+
+/* Pagination button hover */
+.pagination-btn {
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+/* Social link hover */
+.social-link {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.social-link:hover {
+    transform: translateY(-2px);
+}
+
+/* Newsletter input focus */
+.newsletter-input {
+    transition: border-color 0.2s ease;
+}
+
+/* Success animation for order confirmation */
+.success-content svg {
+    animation: scaleIn 0.5s ease 0.2s forwards, float 3s ease-in-out 1s infinite;
+    opacity: 0;
+}
+
+/* Error shake for form validation */
+.form-message.error {
+    animation: shake 0.5s ease;
+}
+
+/* Form message appearance */
+.form-message.success,
+.form-message.error {
+    animation: fadeInDown 0.3s ease;
+}
+
+/* Cart message appearance */
+.cart-message.success {
+    animation: fadeInDown 0.3s ease;
+}
+
+/* ============================================================
+   Loading Animations
+   ============================================================ */
+
+/* Spinner */
+.spinner,
+.spinner-sm {
+    animation: spin 0.8s linear infinite;
+}
+
+/* Skeleton loading placeholders */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--color-light-gray) 25%,
+        var(--color-off-white) 50%,
+        var(--color-light-gray) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+    height: 1em;
+    margin-bottom: 0.5em;
+}
+
+.skeleton-text:last-child {
+    width: 70%;
+}
+
+.skeleton-title {
+    height: 1.5em;
+    width: 60%;
+    margin-bottom: 1em;
+}
+
+.skeleton-image {
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+/* ============================================================
+   Notification / Toast Animations
+   ============================================================ */
+
+/* Toast notification slide in */
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+.toast {
+    animation: toastIn 0.4s ease forwards;
+}
+
+.toast.hiding {
+    animation: toastOut 0.4s ease forwards;
+}
+
+/* ============================================================
+   Scroll-Triggered Animations
+   ============================================================ */
+
+/* Elements that animate when they enter the viewport */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================================
+   Navigation Mobile Menu Animation
+   ============================================================ */
+
+/* Nav toggle hamburger animation */
+.nav-toggle span {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.nav-toggle.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile nav list */
+.nav-list {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.nav-list.open {
+    animation: slideDown 0.3s ease forwards;
+}
+
+/* Filter panel */
+.filter-panel {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.filter-panel.open {
+    animation: slideDown 0.3s ease forwards;
+}
+
+/* ============================================================
+   Reduced Motion
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .hero-title,
+    .hero-subtitle,
+    .hero-actions,
+    .product-card,
+    .category-card,
+    .benefit-card,
+    .value-card,
+    .faq-item {
+        opacity: 1;
+    }
+
+    .animate-on-scroll {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}

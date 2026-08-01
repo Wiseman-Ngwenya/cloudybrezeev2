@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CloudyBreeze - Premium humidifiers and aroma diffusers for a healthier, more comfortable home.">
+    <title>CloudyBreeze - Premium Humidifiers & Aroma Diffusers</title>
+    <link rel="icon" href="images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- Header / Navigation -->
+    <!-- ============================================================ -->
+    <header class="site-header" id="siteHeader">
+        <div class="container header-container">
+            <a href="/" class="logo-link">
+                <img src="images/logo.png" alt="CloudyBreeze Logo" class="logo">
+            </a>
+            <nav class="main-nav" id="mainNav">
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-list" id="navList">
+                    <li><a href="/" class="nav-link active">Home</a></li>
+                    <li><a href="/products" class="nav-link">Products</a></li>
+                    <li><a href="/about" class="nav-link">About</a></li>
+                    <li><a href="/contact" class="nav-link">Contact</a></li>
+                    <li><a href="/tracking" class="nav-link">Track Order</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="/checkout" class="cart-link" id="cartLink" aria-label="View cart">
+                    <svg class="cart-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- Main Content -->
+    <!-- ============================================================ -->
+    <main>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-overlay"></div>
+            <img src="images/hero.jpg" alt="Modern humidifier in a serene bedroom" class="hero-image">
+            <div class="hero-content">
+                <div class="container">
+                    <h1 class="hero-title">Breathe Better, Live Better</h1>
+                    <p class="hero-subtitle">
+                        Discover our premium collection of humidifiers and aroma diffusers designed to transform your space into a sanctuary of comfort and wellness.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="/products" class="btn btn-primary btn-lg">Shop Now</a>
+                        <a href="/about" class="btn btn-outline btn-lg">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Products Section -->
+        <section class="featured-section" id="featuredSection">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Featured Products</h2>
+                    <p class="section-subtitle">Our most loved humidifiers and diffusers, handpicked for you</p>
+                </div>
+                <div class="products-grid" id="featuredProducts">
+                    <!-- Loaded dynamically via JavaScript -->
+                </div>
+                <div class="featured-loading" id="featuredLoading">
+                    <div class="spinner"></div>
+                    <p>Loading products...</p>
+                </div>
+                <div class="featured-empty" id="featuredEmpty" style="display: none;">
+                    <p>No featured products available at the moment. Check back soon!</p>
+                </div>
+                <div class="section-footer">
+                    <a href="/products" class="btn btn-secondary">View All Products</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="categories-section" id="categoriesSection">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Shop by Category</h2>
+                    <p class="section-subtitle">Find the perfect product for your needs</p>
+                </div>
+                <div class="categories-grid" id="categoriesGrid">
+                    <!-- Loaded dynamically via JavaScript -->
+                </div>
+                <div class="categories-loading" id="categoriesLoading">
+                    <div class="spinner"></div>
+                    <p>Loading categories...</p>
+                </div>
+                <div class="categories-empty" id="categoriesEmpty" style="display: none;">
+                    <p>No categories available at the moment.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits / Why Choose Us Section -->
+        <section class="benefits-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Why Choose CloudyBreeze</h2>
+                    <p class="section-subtitle">We are committed to bringing you the best in air quality and wellness</p>
+                </div>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                <path d="M2 17l10 5 10-5"></path>
+                                <path d="M2 12l10 5 10-5"></path>
+                            </svg>
+                        </div>
+                        <h3 class="benefit-title">Premium Quality</h3>
+                        <p class="benefit-description">
+                            Every product is carefully selected and tested to ensure the highest standards of quality and durability.
+                        </p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="benefit-title">Fast Shipping</h3>
+                        <p class="benefit-description">
+                            We offer quick and reliable shipping so you can start enjoying your new humidifier as soon as possible.
+                        </p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <div class="benefit-icon">
+                                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="benefit-title">Secure Checkout</h3>
+                        <p class="benefit-description">
+                            Your privacy and security are our top priority. Shop with confidence knowing your data is protected.
+                        </p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <h3 class="benefit-title">Expert Support</h3>
+                        <p class="benefit-description">
+                            Our knowledgeable support team is here to help you find the perfect product and answer any questions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter Section -->
+        <section class="newsletter-section">
+            <div class="container">
+                <div class="newsletter-content">
+                    <h2 class="newsletter-title">Stay in the Loop</h2>
+                    <p class="newsletter-description">
+                        Subscribe to our newsletter for exclusive deals, new product announcements, and wellness tips.
+                    </p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <div class="newsletter-input-group">
+                            <input
+                                type="email"
+                                name="email"
+                                class="newsletter-input"
+                                placeholder="Enter your email address"
+                                required
+                                aria-label="Email address for newsletter"
+                            >
+                            <button type="submit" class="btn btn-primary newsletter-btn">
+                                Subscribe
+                            </button>
+                        </div>
+                        <p class="newsletter-message" id="newsletterMessage"></p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- Footer -->
+    <!-- ============================================================ -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="images/logo.png" alt="CloudyBreeze Logo" class="footer-logo">
+                    <p class="footer-tagline">
+                        Premium humidifiers and aroma diffusers for a healthier, more comfortable home.
+                    </p>
+                    <div class="footer-social" id="footerSocial">
+                        <!-- Social links loaded dynamically -->
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul>
+                        <li><a href="/products">All Products</a></li>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="/tracking">Track Order</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4 class="footer-heading">Customer Service</h4>
+                    <ul>
+                        <li><a href="/shipping">Shipping Policy</a></li>
+                        <li><a href="/refund">Refund Policy</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4 class="footer-heading">Contact Us</h4>
+                    <ul>
+                        <li class="footer-contact-item">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <span id="footerEmail">hello@cloudybreeze.com</span>
+                        </li>
+                        <li class="footer-contact-item" id="footerPhoneWrapper">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <span id="footerPhone"></span>
+                        </li>
+                        <li class="footer-contact-item" id="footerAddressWrapper">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span id="footerAddress"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> CloudyBreeze. All rights reserved.</p>
+                <p>Built with care for a better breathing experience.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================================ -->
+    <!-- Scripts -->
+    <!-- ============================================================ -->
+    <script src="js/analytics.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        // Initialize homepage
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFeaturedProducts();
+            loadCategories();
+            loadStoreSettings();
+            updateCartCount();
+            setupNewsletterForm();
+        });
+
+        async function loadFeaturedProducts() {
+            const container = document.getElementById('featuredProducts');
+            const loading = document.getElementById('featuredLoading');
+            const empty = document.getElementById('featuredEmpty');
+
+            try {
+                const response = await fetch('/api/products/featured?limit=8');
+                const result = await response.json();
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    loading.style.display = 'none';
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                loading.style.display = 'none';
+                const products = result.data;
+
+                container.innerHTML = products.map(product => {
+                    const coverImage = product.cover_image || (product.images && product.images.length > 0 ? product.images[0].image_url : '');
+                    const comparePrice = product.compare_price ? `<span class="product-compare-price">$${parseFloat(product.compare_price).toFixed(2)}</span>` : '';
+                    
+                    return `
+                        <div class="product-card">
+                            <a href="/products/${product.slug}" class="product-card-link">
+                                <div class="product-card-image">
+                                    ${coverImage ? `<img src="${coverImage}" alt="${product.name}" loading="lazy">` : '<div class="product-card-placeholder">No Image</div>'}
+                                </div>
+                                <div class="product-card-body">
+                                    <span class="product-card-category">${product.category ? product.category.name : ''}</span>
+                                    <h3 class="product-card-title">${product.name}</h3>
+                                    <div class="product-card-price">
+                                        <span class="product-price">$${parseFloat(product.price).toFixed(2)}</span>
+                                        ${comparePrice}
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Error loading featured products:', err);
+                loading.style.display = 'none';
+                empty.style.display = 'block';
+                empty.innerHTML = '<p>Unable to load products. Please try again later.</p>';
+            }
+        }
+
+        async function loadCategories() {
+            const container = document.getElementById('categoriesGrid');
+            const loading = document.getElementById('categoriesLoading');
+            const empty = document.getElementById('categoriesEmpty');
+
+            try {
+                const response = await fetch('/api/categories');
+                const result = await response.json();
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    loading.style.display = 'none';
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                loading.style.display = 'none';
+                const categories = result.data;
+
+                container.innerHTML = categories.map(category => `
+                    <a href="/products?category=${category.slug}" class="category-card">
+                        <div class="category-card-image">
+                            ${category.image_url ? `<img src="${category.image_url}" alt="${category.name}" loading="lazy">` : '<div class="category-card-placeholder">No Image</div>'}
+                        </div>
+                        <div class="category-card-body">
+                            <h3 class="category-card-title">${category.name}</h3>
+                            ${category.description ? `<p class="category-card-description">${category.description}</p>` : ''}
+                        </div>
+                    </a>
+                `).join('');
+            } catch (err) {
+                console.error('Error loading categories:', err);
+                loading.style.display = 'none';
+                empty.style.display = 'block';
+                empty.innerHTML = '<p>Unable to load categories. Please try again later.</p>';
+            }
+        }
+
+        async function loadStoreSettings() {
+            try {
+                const response = await fetch('/api/settings');
+                const result = await response.json();
+
+                if (!result.success || !result.data) return;
+
+                const settings = result.data;
+
+                // Update footer email
+                if (settings.email) {
+                    document.getElementById('footerEmail').textContent = settings.email;
+                }
+
+                // Update footer phone
+                if (settings.phone) {
+                    document.getElementById('footerPhone').textContent = settings.phone;
+                } else {
+                    const wrapper = document.getElementById('footerPhoneWrapper');
+                    if (wrapper) wrapper.style.display = 'none';
+                }
+
+                // Update footer address
+                if (settings.address) {
+                    document.getElementById('footerAddress').textContent = settings.address;
+                } else {
+                    const wrapper = document.getElementById('footerAddressWrapper');
+                    if (wrapper) wrapper.style.display = 'none';
+                }
+
+                // Update social links
+                const socialContainer = document.getElementById('footerSocial');
+                let socialHtml = '';
+                if (settings.social && settings.social.facebook) {
+                    socialHtml += `<a href="${settings.social.facebook}" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Facebook">FB</a>`;
+                }
+                if (settings.social && settings.social.instagram) {
+                    socialHtml += `<a href="${settings.social.instagram}" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a>`;
+                }
+                if (settings.social && settings.social.twitter) {
+                    socialHtml += `<a href="${settings.social.twitter}" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="Twitter">TW</a>`;
+                }
+                if (socialHtml) {
+                    socialContainer.innerHTML = socialHtml;
+                }
+
+                // Update SEO title if available
+                if (settings.seo && settings.seo.title) {
+                    document.title = settings.seo.title;
+                }
+            } catch (err) {
+                console.error('Error loading store settings:', err);
+            }
+        }
+
+        function setupNewsletterForm() {
+            const form = document.getElementById('newsletterForm');
+            const messageEl = document.getElementById('newsletterMessage');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = form.querySelector('input[name="email"]').value.trim();
+
+                if (!email) {
+                    messageEl.textContent = 'Please enter your email address.';
+                    messageEl.className = 'newsletter-message error';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/newsletter', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email }),
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        messageEl.textContent = result.message || 'Thank you for subscribing!';
+                        messageEl.className = 'newsletter-message success';
+                        form.reset();
+                    } else {
+                        messageEl.textContent = result.error?.message || 'Subscription failed. Please try again.';
+                        messageEl.className = 'newsletter-message error';
+                    }
+                } catch (err) {
+                    messageEl.textContent = 'Network error. Please try again later.';
+                    messageEl.className = 'newsletter-message error';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

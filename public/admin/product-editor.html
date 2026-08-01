@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Product Editor - CloudyBreeze Admin</title>
+    <link rel="icon" href="../images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="admin-sidebar-header">
+            <a href="/admin/dashboard.html" class="admin-sidebar-logo">
+                <img src="../images/logo.png" alt="CloudyBreeze Logo">
+            </a>
+            <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+        <nav class="admin-nav">
+            <ul class="admin-nav-list">
+                <li><a href="/admin/dashboard.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>Dashboard</a></li>
+                <li><a href="/admin/products.html" class="admin-nav-link active"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>Products</a></li>
+                <li><a href="/admin/categories.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>Categories</a></li>
+                <li><a href="/admin/orders.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>Orders</a></li>
+                <li><a href="/admin/analytics.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Analytics</a></li>
+                <li><a href="/admin/settings.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>Settings</a></li>
+            </ul>
+        </nav>
+        <div class="admin-sidebar-footer">
+            <a href="/" class="admin-nav-link" target="_blank"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>View Store</a>
+            <button class="admin-nav-link" id="logoutBtn"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Logout</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <div class="admin-topbar-left">
+                <h1 class="admin-page-title" id="editorTitle">Add Product</h1>
+            </div>
+            <div class="admin-topbar-right">
+                <a href="/admin/products.html" class="btn btn-outline btn-sm">← Back to Products</a>
+                <span class="admin-user-name" id="adminUserName">Admin</span>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <form class="admin-form" id="productForm" novalidate>
+                <!-- Basic Info -->
+                <div class="admin-card">
+                    <div class="admin-card-header"><h2 class="admin-card-title">Basic Information</h2></div>
+                    <div class="admin-card-body">
+                        <div class="form-row form-row-2col">
+                            <div class="form-group">
+                                <label for="productName" class="form-label">Product Name *</label>
+                                <input type="text" id="productName" name="name" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="productSlug" class="form-label">Slug</label>
+                                <input type="text" id="productSlug" name="slug" class="form-input" placeholder="Auto-generated if left empty">
+                            </div>
+                        </div>
+                        <div class="form-row form-row-2col">
+                            <div class="form-group">
+                                <label for="productCategory" class="form-label">Category</label>
+                                <select id="productCategory" name="category_id" class="form-select">
+                                    <option value="">No Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="productPrice" class="form-label">Price *</label>
+                                <input type="number" id="productPrice" name="price" class="form-input" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="form-row form-row-2col">
+                            <div class="form-group">
+                                <label for="productComparePrice" class="form-label">Compare Price</label>
+                                <input type="number" id="productComparePrice" name="compare_price" class="form-input" step="0.01" min="0" placeholder="Original price for sale items">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Options</label>
+                                <div class="admin-checkbox-group">
+                                    <label class="admin-checkbox">
+                                        <input type="checkbox" name="featured" id="productFeatured"> Featured
+                                    </label>
+                                    <label class="admin-checkbox">
+                                        <input type="checkbox" name="active" id="productActive" checked> Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="productShortDesc" class="form-label">Short Description</label>
+                            <textarea id="productShortDesc" name="short_description" class="form-textarea" rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="productDescription" class="form-label">Full Description</label>
+                            <textarea id="productDescription" name="description" class="form-textarea" rows="6"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cover Image -->
+                <div class="admin-card">
+                    <div class="admin-card-header"><h2 class="admin-card-title">Cover Image</h2></div>
+                    <div class="admin-card-body">
+                        <div class="admin-image-upload">
+                            <div class="admin-image-preview" id="coverImagePreview">
+                                <span>No image selected</span>
+                            </div>
+                            <input type="file" id="coverImageInput" accept="image/jpeg,image/png,image/webp" class="form-input">
+                            <input type="hidden" id="coverImageUrl" name="cover_image">
+                            <button type="button" class="btn btn-sm btn-outline" id="uploadCoverBtn">Upload Cover Image</button>
+                            <span class="admin-upload-status" id="coverUploadStatus"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Images -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h2 class="admin-card-title">Gallery Images</h2>
+                        <button type="button" class="btn btn-sm btn-outline" id="addGalleryBtn">+ Add Image</button>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="admin-gallery-list" id="galleryList">
+                            <p class="text-muted">No gallery images added yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Variants -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h2 class="admin-card-title">Variants</h2>
+                        <button type="button" class="btn btn-sm btn-outline" id="addVariantBtn">+ Add Variant</button>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="admin-variants-list" id="variantsList">
+                            <p class="text-muted">No variants added yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="admin-form-actions">
+                    <div class="form-message error" id="formMessage" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">Save Product</button>
+                    <a href="/admin/products.html" class="btn btn-outline btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hidden gallery image template -->
+    <template id="galleryItemTemplate">
+        <div class="admin-gallery-item">
+            <input type="file" accept="image/jpeg,image/png,image/webp" class="form-input gallery-file-input">
+            <input type="hidden" class="gallery-url-input" value="">
+            <div class="admin-gallery-preview"></div>
+            <button type="button" class="btn btn-sm btn-outline upload-gallery-btn">Upload</button>
+            <button type="button" class="btn btn-sm btn-outline remove-gallery-btn" style="color:var(--color-error);border-color:var(--color-error);">Remove</button>
+            <span class="admin-upload-status"></span>
+        </div>
+    </template>
+
+    <!-- Hidden variant template -->
+    <template id="variantTemplate">
+        <div class="admin-variant-item">
+            <div class="form-row form-row-2col" style="margin-bottom:0;">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input variant-name-input" placeholder="e.g., Blue, Large">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">SKU</label>
+                    <input type="text" class="form-input variant-sku-input" placeholder="Optional">
+                </div>
+            </div>
+            <div class="form-row form-row-2col" style="margin-bottom:0;">
+                <div class="form-group">
+                    <label class="form-label">Price Adjustment</label>
+                    <input type="number" class="form-input variant-price-input" step="0.01" value="0" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Image</label>
+                    <input type="file" accept="image/jpeg,image/png,image/webp" class="form-input variant-file-input">
+                    <input type="hidden" class="variant-url-input" value="">
+                </div>
+            </div>
+            <div class="admin-variant-actions">
+                <button type="button" class="btn btn-sm btn-outline upload-variant-btn">Upload Variant Image</button>
+                <button type="button" class="btn btn-sm btn-outline remove-variant-btn" style="color:var(--color-error);border-color:var(--color-error);">Remove Variant</button>
+                <span class="admin-upload-status"></span>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/admin.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            if (!window.CloudyBreezeAdmin || !window.CloudyBreezeAdmin.checkAuth()) {
+                window.location.href = '/admin/login.html';
+                return;
+            }
+
+            var productId = null;
+            var isEditMode = false;
+
+            document.addEventListener('DOMContentLoaded', function () {
+                setAdminUserName();
+                initSidebar();
+                initLogout();
+                loadCategories();
+                initForm();
+                initUploadButtons();
+                initAddButtons();
+                checkEditMode();
+            });
+
+            function checkEditMode() {
+                var params = new URLSearchParams(window.location.search);
+                productId = params.get('id');
+                if (productId) {
+                    isEditMode = true;
+                    document.getElementById('editorTitle').textContent = 'Edit Product';
+                    loadProduct(productId);
+                }
+            }
+
+            function loadProduct(id) {
+                window.CloudyBreezeAdmin.apiGet('/api/products/admin/' + id)
+                    .then(function (result) {
+                        if (!result.success || !result.data) return;
+                        var p = result.data;
+                        document.getElementById('productName').value = p.name || '';
+                        document.getElementById('productSlug').value = p.slug || '';
+                        document.getElementById('productPrice').value = p.price || '';
+                        document.getElementById('productComparePrice').value = p.compare_price || '';
+                        document.getElementById('productShortDesc').value = p.short_description || '';
+                        document.getElementById('productDescription').value = p.description || '';
+                        document.getElementById('productFeatured').checked = p.featured;
+                        document.getElementById('productActive').checked = p.active;
+                        document.getElementById('coverImageUrl').value = p.cover_image || '';
+                        if (p.cover_image) {
+                            document.getElementById('coverImagePreview').innerHTML = '<img src="' + p.cover_image + '" alt="Cover">';
+                        }
+                        if (p.category_id) {
+                            document.getElementById('productCategory').value = p.category_id;
+                        }
+                        // Load images and variants
+                        if (p.images) renderGalleryImages(p.images);
+                        if (p.variants) renderVariants(p.variants);
+                    })
+                    .catch(function (err) { console.error(err); });
+            }
+
+            function loadCategories() {
+                window.CloudyBreezeAdmin.apiGet('/api/categories/admin')
+                    .then(function (result) {
+                        if (!result.success) return;
+                        var select = document.getElementById('productCategory');
+                        (result.data || []).forEach(function (cat) {
+                            var option = document.createElement('option');
+                            option.value = cat.id;
+                            option.textContent = cat.name;
+                            select.appendChild(option);
+                        });
+                    })
+                    .catch(function (err) { console.error(err); });
+            }
+
+            function initForm() {
+                var form = document.getElementById('productForm');
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    saveProduct();
+                });
+            }
+
+            function saveProduct() {
+                var data = {
+                    name: document.getElementById('productName').value.trim(),
+                    slug: document.getElementById('productSlug').value.trim() || undefined,
+                    category_id: document.getElementById('productCategory').value || null,
+                    price: parseFloat(document.getElementById('productPrice').value) || 0,
+                    compare_price: parseFloat(document.getElementById('productComparePrice').value) || null,
+                    short_description: document.getElementById('productShortDesc').value.trim(),
+                    description: document.getElementById('productDescription').value.trim(),
+                    featured: document.getElementById('productFeatured').checked,
+                    active: document.getElementById('productActive').checked,
+                    cover_image: document.getElementById('coverImageUrl').value || null,
+                };
+
+                if (!data.name) { showMessage('Product name is required.', 'error'); return; }
+                if (data.price < 0) { showMessage('Price must be a positive number.', 'error'); return; }
+
+                var url = isEditMode ? '/api/products/admin/' + productId : '/api/products/admin';
+                var method = isEditMode ? 'PUT' : 'POST';
+
+                var btn = document.getElementById('saveBtn');
+                btn.disabled = true;
+                btn.textContent = 'Saving...';
+
+                window.CloudyBreezeAdmin.apiRequest(url, method, data)
+                    .then(function (result) {
+                        btn.disabled = false;
+                        btn.textContent = 'Save Product';
+                        if (!result.success) {
+                            showMessage(result.error ? result.error.message : 'Failed to save product.', 'error');
+                            return;
+                        }
+                        var saved = result.data;
+                        // Save gallery images
+                        saveGalleryImages(saved.id).then(function () {
+                            // Save variants
+                            saveVariants(saved.id).then(function () {
+                                window.location.href = '/admin/products.html';
+                            });
+                        });
+                    })
+                    .catch(function (err) {
+                        btn.disabled = false;
+                        btn.textContent = 'Save Product';
+                        showMessage('Network error. Please try again.', 'error');
+                    });
+            }
+
+            // --- Image Upload ---
+            function uploadImage(file, callback) {
+                var formData = new FormData();
+                formData.append('image', file);
+                fetch('/api/admin/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('cb_admin_token') },
+                    body: formData,
+                })
+                    .then(function (res) { return res.json(); })
+                    .then(function (result) {
+                        callback(result.success ? null : (result.error ? result.error.message : 'Upload failed'), result.success ? result.data : null);
+                    })
+                    .catch(function () { callback('Upload failed', null); });
+            }
+
+            function initUploadButtons() {
+                document.getElementById('uploadCoverBtn').addEventListener('click', function () {
+                    var file = document.getElementById('coverImageInput').files[0];
+                    if (!file) return;
+                    var statusEl = document.getElementById('coverUploadStatus');
+                    statusEl.textContent = 'Uploading...';
+                    uploadImage(file, function (err, data) {
+                        if (err) { statusEl.textContent = err; return; }
+                        document.getElementById('coverImageUrl').value = data.url;
+                        document.getElementById('coverImagePreview').innerHTML = '<img src="' + data.url + '" alt="Cover">';
+                        statusEl.textContent = 'Uploaded!';
+                    });
+                });
+            }
+
+            // --- Gallery Images ---
+            function initAddButtons() {
+                document.getElementById('addGalleryBtn').addEventListener('click', function () {
+                    var template = document.getElementById('galleryItemTemplate');
+                    var clone = template.content.cloneNode(true);
+                    document.getElementById('galleryList').appendChild(clone);
+                    attachGalleryEvents(document.getElementById('galleryList').lastElementChild);
+                });
+                document.getElementById('addVariantBtn').addEventListener('click', function () {
+                    var template = document.getElementById('variantTemplate');
+                    var clone = template.content.cloneNode(true);
+                    document.getElementById('variantsList').appendChild(clone);
+                    attachVariantEvents(document.getElementById('variantsList').lastElementChild);
+                });
+            }
+
+            function renderGalleryImages(images) {
+                var list = document.getElementById('galleryList');
+                list.innerHTML = '';
+                images.forEach(function (img) {
+                    var template = document.getElementById('galleryItemTemplate');
+                    var clone = template.content.cloneNode(true);
+                    var item = clone.firstElementChild;
+                    item.querySelector('.gallery-url-input').value = img.image_url || '';
+                    if (img.image_url) {
+                        item.querySelector('.admin-gallery-preview').innerHTML = '<img src="' + img.image_url + '" alt="Gallery">';
+                    }
+                    list.appendChild(item);
+                    attachGalleryEvents(item);
+                });
+                if (images.length === 0) {
+                    list.innerHTML = '<p class="text-muted">No gallery images added yet.</p>';
+                }
+            }
+
+            function attachGalleryEvents(item) {
+                var uploadBtn = item.querySelector('.upload-gallery-btn');
+                var removeBtn = item.querySelector('.remove-gallery-btn');
+                var fileInput = item.querySelector('.gallery-file-input');
+                var urlInput = item.querySelector('.gallery-url-input');
+                var preview = item.querySelector('.admin-gallery-preview');
+                var statusEl = item.querySelector('.admin-upload-status');
+
+                uploadBtn.addEventListener('click', function () {
+                    var file = fileInput.files[0];
+                    if (!file) return;
+                    statusEl.textContent = 'Uploading...';
+                    uploadImage(file, function (err, data) {
+                        if (err) { statusEl.textContent = err; return; }
+                        urlInput.value = data.url;
+                        preview.innerHTML = '<img src="' + data.url + '" alt="Gallery">';
+                        statusEl.textContent = 'Uploaded!';
+                    });
+                });
+                removeBtn.addEventListener('click', function () {
+                    item.remove();
+                    if (document.getElementById('galleryList').children.length === 0) {
+                        document.getElementById('galleryList').innerHTML = '<p class="text-muted">No gallery images added yet.</p>';
+                    }
+                });
+            }
+
+            function saveGalleryImages(productId) {
+                var items = document.getElementById('galleryList').querySelectorAll('.admin-gallery-item');
+                var promises = [];
+                items.forEach(function (item) {
+                    var url = item.querySelector('.gallery-url-input').value;
+                    if (url) {
+                        promises.push(
+                            window.CloudyBreezeAdmin.apiPost('/api/products/admin/' + productId + '/images', { image_url: url })
+                        );
+                    }
+                });
+                return Promise.all(promises).catch(function () {});
+            }
+
+            // --- Variants ---
+            function renderVariants(variants) {
+                var list = document.getElementById('variantsList');
+                list.innerHTML = '';
+                variants.forEach(function (v) {
+                    var template = document.getElementById('variantTemplate');
+                    var clone = template.content.cloneNode(true);
+                    var item = clone.firstElementChild;
+                    item.querySelector('.variant-name-input').value = v.variation_name || '';
+                    item.querySelector('.variant-sku-input').value = v.sku || '';
+                    item.querySelector('.variant-price-input').value = v.price_adjustment || 0;
+                    item.querySelector('.variant-url-input').value = v.image_url || '';
+                    list.appendChild(item);
+                    attachVariantEvents(item);
+                });
+                if (variants.length === 0) {
+                    list.innerHTML = '<p class="text-muted">No variants added yet.</p>';
+                }
+            }
+
+            function attachVariantEvents(item) {
+                var uploadBtn = item.querySelector('.upload-variant-btn');
+                var removeBtn = item.querySelector('.remove-variant-btn');
+                var fileInput = item.querySelector('.variant-file-input');
+                var urlInput = item.querySelector('.variant-url-input');
+                var statusEl = item.querySelector('.admin-upload-status');
+
+                uploadBtn.addEventListener('click', function () {
+                    var file = fileInput.files[0];
+                    if (!file) return;
+                    statusEl.textContent = 'Uploading...';
+                    uploadImage(file, function (err, data) {
+                        if (err) { statusEl.textContent = err; return; }
+                        urlInput.value = data.url;
+                        statusEl.textContent = 'Uploaded!';
+                    });
+                });
+                removeBtn.addEventListener('click', function () {
+                    item.remove();
+                    if (document.getElementById('variantsList').children.length === 0) {
+                        document.getElementById('variantsList').innerHTML = '<p class="text-muted">No variants added yet.</p>';
+                    }
+                });
+            }
+
+            function saveVariants(productId) {
+                var items = document.getElementById('variantsList').querySelectorAll('.admin-variant-item');
+                var promises = [];
+                items.forEach(function (item) {
+                    var name = item.querySelector('.variant-name-input').value.trim();
+                    if (!name) return;
+                    promises.push(
+                        window.CloudyBreezeAdmin.apiPost('/api/products/admin/' + productId + '/variants', {
+                            variation_name: name,
+                            sku: item.querySelector('.variant-sku-input').value.trim() || null,
+                            price_adjustment: parseFloat(item.querySelector('.variant-price-input').value) || 0,
+                            image_url: item.querySelector('.variant-url-input').value || null,
+                        })
+                    );
+                });
+                return Promise.all(promises).catch(function () {});
+            }
+
+            function showMessage(msg, type) {
+                var el = document.getElementById('formMessage');
+                el.textContent = msg;
+                el.className = 'form-message ' + type;
+                el.style.display = 'block';
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            function setAdminUserName() {
+                var user = window.CloudyBreezeAdmin.getUser();
+                var el = document.getElementById('adminUserName');
+                if (el && user) el.textContent = user.fullName || user.email;
+            }
+            function initSidebar() {
+                var toggle = document.getElementById('sidebarToggle');
+                var sidebar = document.getElementById('adminSidebar');
+                if (toggle && sidebar) toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); });
+            }
+            function initLogout() {
+                var btn = document.getElementById('logoutBtn');
+                if (btn) btn.addEventListener('click', function () { window.CloudyBreezeAdmin.logout(); });
+            }
+        })();
+    </script>
+</body>
+</html>

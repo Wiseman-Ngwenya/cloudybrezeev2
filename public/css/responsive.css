@@ -1,0 +1,623 @@
+/* ============================================================
+   CloudyBreeze E-Commerce System
+   Responsive Stylesheet
+   ============================================================
+   Breakpoints:
+   - 1024px: Tablet landscape / Small desktop
+   - 768px:  Tablet portrait
+   - 480px:  Mobile landscape / Large phone
+   - 360px:  Small phone
+   ============================================================ */
+
+/* ============================================================
+   Tablet Landscape / Small Desktop (max-width: 1024px)
+   ============================================================ */
+@media (max-width: 1024px) {
+
+    /* Products Grid */
+    .products-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Categories Grid */
+    .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Benefits Grid */
+    .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Values Grid */
+    .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Footer Grid */
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    /* Product Detail */
+    .product-detail-layout {
+        gap: var(--spacing-2xl);
+    }
+
+    /* Checkout */
+    .checkout-layout {
+        gap: var(--spacing-2xl);
+    }
+
+    /* Contact */
+    .contact-layout {
+        gap: var(--spacing-2xl);
+    }
+
+    /* Catalog */
+    .catalog-layout {
+        grid-template-columns: 220px 1fr;
+        gap: var(--spacing-xl);
+    }
+}
+
+/* ============================================================
+   Tablet Portrait (max-width: 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* Typography */
+    :root {
+        --font-size-5xl: 2.5rem;
+        --font-size-4xl: 2rem;
+        --font-size-3xl: 1.75rem;
+        --font-size-2xl: 1.5rem;
+    }
+
+    /* Container */
+    .container {
+        padding: 0 var(--spacing-md);
+    }
+
+    /* Header / Navigation */
+    .nav-toggle {
+        display: flex;
+    }
+
+    .nav-list {
+        display: none;
+        position: absolute;
+        top: var(--header-height);
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background-color: var(--color-white);
+        border-bottom: 1px solid var(--color-light-gray);
+        box-shadow: var(--shadow-lg);
+        padding: var(--spacing-md);
+        gap: 0;
+    }
+
+    .nav-list.open {
+        display: flex;
+    }
+
+    .nav-link {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
+    }
+
+    /* Hero Section */
+    .hero-section {
+        height: 480px;
+    }
+
+    .hero-title {
+        font-size: var(--font-size-4xl);
+    }
+
+    .hero-subtitle {
+        font-size: var(--font-size-base);
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+    }
+
+    /* Products Grid */
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    /* Categories Grid */
+    .categories-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+
+    /* Benefits Grid */
+    .benefits-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .benefit-card {
+        padding: var(--spacing-lg);
+    }
+
+    .benefit-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    /* Product Detail */
+    .product-detail-layout {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .product-gallery {
+        position: static;
+    }
+
+    .product-title {
+        font-size: var(--font-size-2xl);
+    }
+
+    .product-price-lg {
+        font-size: var(--font-size-2xl);
+    }
+
+    /* Checkout */
+    .checkout-layout {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .checkout-summary {
+        position: static;
+        order: -1;
+    }
+
+    .form-row-2col {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tracking */
+    .tracking-input-group {
+        flex-direction: column;
+    }
+
+    .tracking-btn {
+        width: 100%;
+    }
+
+    /* Order Details */
+    .order-details-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    /* Order Progress */
+    .order-progress {
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+    }
+
+    .order-progress::before {
+        display: none;
+    }
+
+    .progress-step {
+        flex: 0 0 auto;
+        flex-direction: row;
+        gap: var(--spacing-sm);
+        min-width: 30%;
+    }
+
+    /* Contact */
+    .contact-layout {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-2xl);
+    }
+
+    /* Catalog */
+    .catalog-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .catalog-sidebar {
+        position: relative;
+    }
+
+    .filter-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+    }
+
+    .filter-panel {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        background-color: var(--color-white);
+        border: 1px solid var(--color-light-gray);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-lg);
+        margin-top: var(--spacing-xs);
+    }
+
+    .filter-panel.open {
+        display: block;
+    }
+
+    /* About Page */
+    .about-story-layout {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .about-story-image {
+        order: -1;
+    }
+
+    /* Values Grid */
+    .values-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .value-card {
+        padding: var(--spacing-lg);
+    }
+
+    .value-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    /* Footer */
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        text-align: center;
+    }
+
+    /* Newsletter */
+    .newsletter-input-group {
+        flex-direction: column;
+    }
+
+    .newsletter-btn {
+        width: 100%;
+    }
+
+    /* Sections */
+    .featured-section,
+    .categories-section,
+    .benefits-section,
+    .newsletter-section {
+        padding: var(--spacing-3xl) 0;
+    }
+
+    .section-header {
+        margin-bottom: var(--spacing-2xl);
+    }
+
+    .section-footer {
+        margin-top: var(--spacing-2xl);
+    }
+
+    /* Payment Options */
+    .payment-option {
+        padding: var(--spacing-md);
+    }
+
+    /* Policy Pages */
+    .policy-content {
+        padding: 0;
+    }
+
+    /* FAQ */
+    .faq-group-title {
+        font-size: var(--font-size-xl);
+    }
+
+    /* Error Page */
+    .error-code {
+        font-size: 6rem;
+    }
+
+    .error-actions {
+        flex-direction: column;
+    }
+
+    .error-actions .btn {
+        width: 100%;
+    }
+}
+
+/* ============================================================
+   Mobile Landscape / Large Phone (max-width: 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+
+    /* Typography */
+    :root {
+        --font-size-5xl: 2rem;
+        --font-size-4xl: 1.75rem;
+        --font-size-3xl: 1.5rem;
+        --font-size-2xl: 1.25rem;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        height: 400px;
+    }
+
+    .hero-title {
+        font-size: var(--font-size-4xl);
+    }
+
+    .hero-subtitle {
+        font-size: var(--font-size-sm);
+    }
+
+    /* Products Grid */
+    .products-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .product-card-body {
+        padding: var(--spacing-md);
+    }
+
+    .product-card-title {
+        font-size: var(--font-size-sm);
+    }
+
+    .product-price {
+        font-size: var(--font-size-base);
+    }
+
+    /* Categories Grid */
+    .categories-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    /* Benefits Grid */
+    .benefits-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .benefit-card {
+        padding: var(--spacing-md);
+    }
+
+    /* Values Grid */
+    .values-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .value-card {
+        padding: var(--spacing-md);
+    }
+
+    /* Product Detail */
+    .gallery-thumbnails {
+        gap: var(--spacing-xs);
+    }
+
+    .gallery-thumbnail {
+        width: 60px;
+        height: 60px;
+    }
+
+    .product-pricing {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+
+    .variants-options {
+        gap: var(--spacing-xs);
+    }
+
+    .variant-option {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
+    }
+
+    .product-actions .btn {
+        width: 100%;
+    }
+
+    /* Checkout Success */
+    .success-actions {
+        flex-direction: column;
+    }
+
+    .success-actions .btn {
+        width: 100%;
+    }
+
+    /* Cart Items */
+    .cart-item {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .cart-item-image {
+        width: 100%;
+        height: 120px;
+    }
+
+    /* Order Progress */
+    .progress-step {
+        min-width: 45%;
+    }
+
+    /* Footer */
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .footer-brand,
+    .footer-links,
+    .footer-contact {
+        text-align: center;
+    }
+
+    .footer-social {
+        justify-content: center;
+    }
+
+    .footer-contact-item {
+        justify-content: center;
+    }
+
+    .footer-logo {
+        margin: 0 auto var(--spacing-md);
+    }
+
+    /* Page Header */
+    .page-header {
+        padding: var(--spacing-2xl) 0;
+    }
+
+    .page-title {
+        font-size: var(--font-size-3xl);
+    }
+
+    /* Form Fieldset */
+    .form-fieldset {
+        padding: var(--spacing-md);
+    }
+
+    /* Contact */
+    .contact-detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    /* Tracking */
+    .tracking-input {
+        font-size: var(--font-size-base);
+        padding: var(--spacing-md);
+    }
+
+    /* Error Page */
+    .error-code {
+        font-size: 4rem;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* ============================================================
+   Small Phone (max-width: 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+
+    /* Products Grid */
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    /* Order Progress */
+    .progress-step {
+        min-width: 100%;
+    }
+
+    /* Header */
+    .logo {
+        height: 32px;
+    }
+
+    /* Buttons */
+    .btn-lg {
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-size-base);
+    }
+
+    /* Policy Content */
+    .policy-content {
+        font-size: var(--font-size-sm);
+    }
+
+    /* FAQ */
+    .faq-question {
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* ============================================================
+   Print Styles
+   ============================================================ */
+@media print {
+
+    .site-header,
+    .site-footer,
+    .newsletter-section,
+    .cart-link,
+    .nav-toggle,
+    .btn,
+    .filter-toggle,
+    .filter-panel,
+    .pagination {
+        display: none !important;
+    }
+
+    body {
+        font-size: 12pt;
+        color: #000;
+        background: #fff;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    a {
+        color: #000;
+        text-decoration: underline;
+    }
+
+    .order-details-card,
+    .checkout-summary {
+        border: 1px solid #ccc;
+        box-shadow: none;
+    }
+}

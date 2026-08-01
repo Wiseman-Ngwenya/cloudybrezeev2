@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse our complete collection of premium humidifiers and aroma diffusers at CloudyBreeze.">
+    <title>Products - CloudyBreeze</title>
+    <link rel="icon" href="images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="site-header" id="siteHeader">
+        <div class="container header-container">
+            <a href="/" class="logo-link">
+                <img src="images/logo.png" alt="CloudyBreeze Logo" class="logo">
+            </a>
+            <nav class="main-nav" id="mainNav">
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-list" id="navList">
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/products" class="nav-link active">Products</a></li>
+                    <li><a href="/about" class="nav-link">About</a></li>
+                    <li><a href="/contact" class="nav-link">Contact</a></li>
+                    <li><a href="/tracking" class="nav-link">Track Order</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="/checkout" class="cart-link" id="cartLink" aria-label="View cart">
+                    <svg class="cart-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="container">
+                <h1 class="page-title">Our Products</h1>
+                <p class="page-subtitle">Explore our complete range of premium humidifiers and aroma diffusers</p>
+            </div>
+        </section>
+
+        <!-- Product Catalog -->
+        <section class="catalog-section">
+            <div class="container">
+                <div class="catalog-layout">
+                    <!-- Sidebar Filters -->
+                    <aside class="catalog-sidebar" id="catalogSidebar">
+                        <button class="filter-toggle" id="filterToggle" aria-label="Toggle filters">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                            </svg>
+                            Filters
+                        </button>
+                        <div class="filter-panel" id="filterPanel">
+                            <!-- Search -->
+                            <div class="filter-group">
+                                <h4 class="filter-title">Search</h4>
+                                <div class="filter-search">
+                                    <input
+                                        type="text"
+                                        class="filter-input"
+                                        id="searchInput"
+                                        placeholder="Search products..."
+                                        aria-label="Search products"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Categories -->
+                            <div class="filter-group">
+                                <h4 class="filter-title">Category</h4>
+                                <div class="filter-options" id="categoryFilters">
+                                    <button class="filter-option active" data-category="">
+                                        All Products
+                                    </button>
+                                    <!-- Categories loaded dynamically -->
+                                </div>
+                                <div class="filter-loading" id="categoryFilterLoading">
+                                    <div class="spinner-sm"></div>
+                                </div>
+                            </div>
+
+                            <!-- Sort -->
+                            <div class="filter-group">
+                                <h4 class="filter-title">Sort By</h4>
+                                <select class="filter-select" id="sortSelect" aria-label="Sort products">
+                                    <option value="created_at-desc">Newest First</option>
+                                    <option value="created_at-asc">Oldest First</option>
+                                    <option value="price-asc">Price: Low to High</option>
+                                    <option value="price-desc">Price: High to Low</option>
+                                    <option value="name-asc">Name: A to Z</option>
+                                    <option value="name-desc">Name: Z to A</option>
+                                </select>
+                            </div>
+
+                            <!-- Clear Filters -->
+                            <button class="btn btn-outline btn-sm btn-full" id="clearFilters">
+                                Clear All Filters
+                            </button>
+                        </div>
+                    </aside>
+
+                    <!-- Product Grid -->
+                    <div class="catalog-main">
+                        <!-- Results Info -->
+                        <div class="catalog-info" id="catalogInfo">
+                            <p>Showing <span id="resultCount">0</span> product(s)</p>
+                        </div>
+
+                        <!-- Product Grid -->
+                        <div class="products-grid" id="productsGrid">
+                            <!-- Products loaded dynamically -->
+                        </div>
+
+                        <!-- Loading -->
+                        <div class="catalog-loading" id="catalogLoading">
+                            <div class="spinner"></div>
+                            <p>Loading products...</p>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div class="catalog-empty" id="catalogEmpty" style="display: none;">
+                            <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <h3>No Products Found</h3>
+                            <p id="catalogEmptyMessage">Try adjusting your filters or search terms.</p>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="pagination" id="pagination">
+                            <!-- Pagination buttons loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="images/logo.png" alt="CloudyBreeze Logo" class="footer-logo">
+                    <p class="footer-tagline">
+                        Premium humidifiers and aroma diffusers for a healthier, more comfortable home.
+                    </p>
+                    <div class="footer-social" id="footerSocial"></div>
+                </div>
+                <div class="footer-links">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul>
+                        <li><a href="/products">All Products</a></li>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="/tracking">Track Order</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4 class="footer-heading">Customer Service</h4>
+                    <ul>
+                        <li><a href="/shipping">Shipping Policy</a></li>
+                        <li><a href="/refund">Refund Policy</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4 class="footer-heading">Contact Us</h4>
+                    <ul>
+                        <li class="footer-contact-item">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <span id="footerEmail">hello@cloudybreeze.com</span>
+                        </li>
+                        <li class="footer-contact-item" id="footerPhoneWrapper">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <span id="footerPhone"></span>
+                        </li>
+                        <li class="footer-contact-item" id="footerAddressWrapper">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span id="footerAddress"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> CloudyBreeze. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/analytics.js"></script>
+    <script src="js/site.js"></script>
+    <script src="js/products.js"></script>
+</body>
+</html>

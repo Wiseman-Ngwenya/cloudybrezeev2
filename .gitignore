@@ -1,0 +1,68 @@
+# ============================================================
+# CloudyBreeze Git Ignore File
+# ============================================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+logs/
+*.log
+
+# Uploads (temporary)
+tmp/
+temp/
+uploads/
+
+# Runtime Data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage Reports
+coverage/
+.nyc_output/
+
+# Build Artifacts
+dist/
+build/
+
+# Supabase Local
+.supabase/
+
+# Certificates
+*.pem
+*.cert
+*.key
+
+# Environment-Specific
+*.local

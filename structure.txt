@@ -1,0 +1,92 @@
+CloudyBreeze/
+├── README.md
+├── ARCHITECTURE.md
+├── package.json
+├── package-lock.json
+├── .env.example
+├── .gitignore
+├── server.js                  # Express app entry point
+├── config/
+│   └── supabase.js            # Supabase client initialization
+├── database/
+│   └── schema.sql             # Full database schema
+├── middleware/
+│   ├── auth.js                # Admin authentication
+│   ├── upload.js              # File upload handling
+│   ├── errorHandler.js        # Centralized error handling
+│   └── validate.js            # Input validation
+├── controllers/
+│   ├── authController.js
+│   ├── categoryController.js
+│   ├── productController.js
+│   ├── orderController.js
+│   ├── analyticsController.js
+│   ├── contactController.js
+│   ├── newsletterController.js
+│   ├── settingsController.js
+│   └── uploadController.js
+├── services/
+│   ├── authService.js
+│   ├── categoryService.js
+│   ├── productService.js
+│   ├── orderService.js
+│   ├── analyticsService.js
+│   ├── contactService.js
+│   ├── newsletterService.js
+│   ├── settingsService.js
+│   └── uploadService.js
+├── routes/
+│   ├── auth.js
+│   ├── categories.js
+│   ├── products.js
+│   ├── orders.js
+│   ├── analytics.js
+│   ├── contact.js
+│   ├── newsletter.js
+│   ├── settings.js
+│   └── upload.js
+├── utils/
+│   ├── helpers.js
+│   └── constants.js
+├── public/                    # Customer-facing frontend
+│   ├── index.html
+│   ├── products.html
+│   ├── product.html
+│   ├── checkout.html
+│   ├── tracking.html
+│   ├── about.html
+│   ├── contact.html
+│   ├── faq.html
+│   ├── privacy.html
+│   ├── refund.html
+│   ├── shipping.html
+│   ├── terms.html
+│   ├── 404.html
+│   ├── css/
+│   │   ├── style.css
+│   │   ├── responsive.css
+│   │   └── animations.css
+│   ├── js/
+│   │   ├── site.js
+│   │   ├── products.js
+│   │   ├── product.js
+│   │   ├── cart.js
+│   │   ├── checkout.js
+│   │   ├── tracking.js
+│   │   └── analytics.js
+│   └── images/
+│       ├── logo.png
+│       ├── hero.jpg
+│       ├── favicon.png
+│       └── products/
+├── admin/                     # Admin dashboard
+│   ├── login.html
+│   ├── dashboard.html
+│   ├── products.html
+│   ├── product-editor.html
+│   ├── categories.html
+│   ├── orders.html
+│   ├── analytics.html
+│   ├── settings.html
+│   ├── js/
+│   └── css/

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Analytics - CloudyBreeze Admin</title>
+    <link rel="icon" href="../images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/animations.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="admin-sidebar-header">
+            <a href="/admin/dashboard.html" class="admin-sidebar-logo">
+                <img src="../images/logo.png" alt="CloudyBreeze Logo">
+            </a>
+            <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+        <nav class="admin-nav">
+            <ul class="admin-nav-list">
+                <li><a href="/admin/dashboard.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>Dashboard</a></li>
+                <li><a href="/admin/products.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>Products</a></li>
+                <li><a href="/admin/categories.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>Categories</a></li>
+                <li><a href="/admin/orders.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>Orders</a></li>
+                <li><a href="/admin/analytics.html" class="admin-nav-link active"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Analytics</a></li>
+                <li><a href="/admin/settings.html" class="admin-nav-link"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>Settings</a></li>
+            </ul>
+        </nav>
+        <div class="admin-sidebar-footer">
+            <a href="/" class="admin-nav-link" target="_blank"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>View Store</a>
+            <button class="admin-nav-link" id="logoutBtn"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Logout</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <div class="admin-topbar-left">
+                <h1 class="admin-page-title">Analytics</h1>
+            </div>
+            <div class="admin-topbar-right">
+                <span class="admin-user-name" id="adminUserName">Admin</span>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <!-- Period Selector -->
+            <div class="admin-card admin-filters">
+                <div class="admin-filters-row">
+                    <select class="form-select" id="periodSelect" style="width:auto;">
+                        <option value="week">This Week</option>
+                        <option value="month" selected>This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Visitor Stats -->
+            <div class="admin-card">
+                <div class="admin-card-header"><h2 class="admin-card-title">Daily Visitors</h2></div>
+                <div class="admin-card-body">
+                    <div class="admin-chart" id="dailyVisitorsChart">
+                        <p class="text-muted">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="admin-stats-grid" style="margin-bottom: var(--spacing-xl);">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-info">
+                        <span class="admin-stat-label">Unique Visitors</span>
+                        <span class="admin-stat-value" id="statUniqueVisitors">0</span>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-info">
+                        <span class="admin-stat-label">Top Browser</span>
+                        <span class="admin-stat-value" id="statTopBrowser">-</span>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-info">
+                        <span class="admin-stat-label">Top OS</span>
+                        <span class="admin-stat-value" id="statTopOS">-</span>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-info">
+                        <span class="admin-stat-label">Top Device</span>
+                        <span class="admin-stat-value" id="statTopDevice">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device & Browser Stats -->
+            <div class="admin-grid-2col">
+                <div class="admin-card">
+                    <div class="admin-card-header"><h2 class="admin-card-title">Browsers</h2></div>
+                    <div class="admin-card-body" id="browserStats"><p class="text-muted">Loading...</p></div>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-header"><h2 class="admin-card-title">Operating Systems</h2></div>
+                    <div class="admin-card-body" id="osStats"><p class="text-muted">Loading...</p></div>
+                </div>
+            </div>
+
+            <!-- Top Countries -->
+            <div class="admin-card">
+                <div class="admin-card-header"><h2 class="admin-card-title">Top Countries</h2></div>
+                <div class="admin-card-body">
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead><tr><th>Country</th><th>Visitors</th></tr></thead>
+                            <tbody id="countriesTable"><tr><td colspan="2" class="admin-table-empty">Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Pages -->
+            <div class="admin-card">
+                <div class="admin-card-header"><h2 class="admin-card-title">Top Pages</h2></div>
+                <div class="admin-card-body">
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead><tr><th>Page</th><th>Views</th></tr></thead>
+                            <tbody id="pagesTable"><tr><td colspan="2" class="admin-table-empty">Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Views -->
+            <div class="admin-card">
+                <div class="admin-card-header"><h2 class="admin-card-title">Most Viewed Products</h2></div>
+                <div class="admin-card-body">
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead><tr><th>Product</th><th>Views</th><th>Price</th><th>Status</th></tr></thead>
+                            <tbody id="productViewsTable"><tr><td colspan="4" class="admin-table-empty">Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            if (!window.CloudyBreezeAdmin || !window.CloudyBreezeAdmin.checkAuth()) {
+                window.location.href = '/admin/login.html';
+                return;
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                setAdminUserName();
+                initSidebar();
+                initLogout();
+                loadAllAnalytics();
+                initPeriodSelector();
+            });
+
+            function initPeriodSelector() {
+                document.getElementById('periodSelect').addEventListener('change', function () {
+                    loadAllAnalytics();
+                });
+            }
+
+            function getPeriod() {
+                return document.getElementById('periodSelect').value || 'month';
+            }
+
+            function loadAllAnalytics() {
+                loadVisitorStats();
+                loadDeviceBrowserStats();
+                loadGeography();
+                loadPages();
+                loadProductViews();
+            }
+
+            function loadVisitorStats() {
+                var period = getPeriod();
+                window.CloudyBreezeAdmin.apiGet('/api/analytics/admin/visitors?period=' + period)
+                    .then(function (result) {
+                        if (!result.success) return;
+                        var data = result.data;
+
+                        // Daily visitors chart
+                        renderDailyChart(data.dailyVisitors);
+
+                        // Unique visitors
+                        document.getElementById('statUniqueVisitors').textContent = data.uniqueVisitors || 0;
+
+                        // Top browser
+                        var browsers = data.browserStats || {};
+                        var topBrowser = Object.entries(browsers).sort(function (a, b) { return b[1] - a[1]; })[0];
+                        document.getElementById('statTopBrowser').textContent = topBrowser ? topBrowser[0] : '-';
+
+                        // Top OS
+                        var osStats = data.osStats || {};
+                        var topOS = Object.entries(osStats).sort(function (a, b) { return b[1] - a[1]; })[0];
+                        document.getElementById('statTopOS').textContent = topOS ? topOS[0] : '-';
+
+                        // Top device
+                        var devices = data.deviceStats || {};
+                        var topDevice = Object.entries(devices).sort(function (a, b) { return b[1] - a[1]; })[0];
+                        document.getElementById('statTopDevice').textContent = topDevice ? topDevice[0] : '-';
+                    })
+                    .catch(function (err) { console.error(err); });
+            }
+
+            function renderDailyChart(dailyVisitors) {
+                var container = document.getElementById('dailyVisitorsChart');
+                if (!dailyVisitors || dailyVisitors.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No visitor data yet.</p>';
+                    return;
+                }
+
+                var maxVal = Math.max.apply(null, dailyVisitors.map(function (d) { return d.count; }));
+                if (maxVal === 0) maxVal = 1;
+
+                var html = '<div class="admin-bar-chart">';
+                dailyVisitors.forEach(function (day) {
+                    var height = Math.round((day.count / maxVal) * 100);
+                    var dateLabel = day.date.split('-').slice(1).join('/');
+                    html += '<div class="admin-bar-item">' +
+                        '<div class="admin-bar" style="height:' + height + '%;" title="' + day.date + ': ' + day.count + ' visitors"></div>' +
+                        '<span class="admin-bar-label">' + dateLabel + '</span>' +
+                        '<span class="admin-bar-value">' + day.count + '</span>' +
+                    '</div>';
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            function loadDeviceBrowserStats() {
+                window.CloudyBreezeAdmin.apiGet('/api/analytics/admin/visitors?period=' + getPeriod())
+                    .then(function (result) {
+                        if (!result.success) return;
+                        var data = result.data;
+                        renderStatList('browserStats', data.browserStats || {});
+                        renderStatList('osStats', data.osStats || {});
+                    })
+                    .catch(function (err) { console.error(err); });
+            }
+
+            function renderStatList(elementId, stats) {
+                var container = document.getElementById(elementId);
+                var entries = Object.entries(stats).sort(function (a, b) { return b[1] - a[1]; });
+                if (entries.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No data yet.</p>';
+                    return;
+                }
+                var total = entries.reduce(function (sum, entry) { return sum + entry[1]; }, 0);
+                var html = '';
+                entries.forEach(function (entry) {
+                    var pct = total > 0 ? Math.round((entry[1] / total) * 100) : 0;
+                    html += '<div class="admin-stat-row">' +
+                        '<span class="admin-stat-row-label">' + entry[0] + '</span>' +
+                        '<div class="admin-stat-row-bar"><div class="admin-stat-row-fill" style="width:' + pct + '%;"></div></div>' +
+                        '<span class="admin-stat-row-value">' + entry[1] + ' (' + pct + '%)</span>' +
+                    '</div>';
+                });
+                container.innerHTML = html;
+            }
+
+            function loadGeography() {
+                window.CloudyBreezeAdmin.apiGet('/api/analytics/admin/geography')
+                    .then(function (result) {
+                        if (!result.success) return;
+                        var countries = result.data.topCountries || [];
+                        var tbody = document.getElementById('countriesTable');
+                        if (countries.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="2" class="admin-table-empty">No data yet.</td></tr>';
+                            return;
+                        }
+                        tbody.innerHTML = countries.map(function (c) {
+                            return '<tr><td>' + c.country + '</td><td>' + c.count + '</td></tr>';
+                        }).join('');
+                    })
+                    .catch(function (err) { console.error(err); });
+            }
+
+            function loadPages() {
+                window.CloudyBreezeAdmin.apiGet('/api/analytics/admin/pages')
+                    .then(function (result) {
+                        if (!result.success) return;
+                        var pages = result.data.topPages || [];
+                        var tbody = document.getElementById('pagesTable');
+                        if (pages.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="2" class="admin-table-empty">No data yet.</td></tr>';
+                            return;
+                        }
+                        tbody.innerHTML = pages.map(function (p) {
+                            return '<tr><td>' + p.page + '</td><td>' + p.count + '</td></tr>';
+                        }).join('');
+                    })
+                    .catch(function (err) { console.error(err); });
+            }
+
+            function loadProductViews() {
+                window.CloudyBreezeAdmin.apiGet('/api/analytics/admin/products')
+                    .then(function (result) {
+                        if (!result.success) return;
+                        var products = result.data.productViews || [];
+                        var tbody = document.getElementById('productViewsTable');
+                        if (products.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="4" class="admin-table-empty">No product views yet.</td></tr>';
+                            return;
+                        }
+                        tbody.innerHTML = products.map(function (p) {
+                            return '<tr>' +
+                                '<td>' + p.name + '</td>' +
+                                '<td>' + p.views + '</td>' +
+                                '<td>$' + parseFloat(p.price).toFixed(2) + '</td>' +
+                                '<td><span class="admin-badge ' + (p.active ? 'badge-success' : 'badge-error') + '">' + (p.active ? 'Active' : 'Inactive') + '</span></td>' +
+                            '</tr>';
+                        }).join('');
+                    })
+                    .catch(function (err) { console.error(err); });
+            }
+
+            function setAdminUserName() {
+                var user = window.CloudyBreezeAdmin.getUser();
+                var el = document.getElementById('adminUserName');
+                if (el && user) el.textContent = user.fullName || user.email;
+            }
+            function initSidebar() {
+                var toggle = document.getElementById('sidebarToggle');
+                var sidebar = document.getElementById('adminSidebar');
+                if (toggle && sidebar) toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); });
+            }
+            function initLogout() {
+                var btn = document.getElementById('logoutBtn');
+                if (btn) btn.addEventListener('click', function () { window.CloudyBreezeAdmin.logout(); });
+            }
+        })();
+    </script>
+</body>
+</html>
