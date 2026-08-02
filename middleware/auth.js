@@ -14,6 +14,44 @@
 const { authClient, serviceClient } = require('../config/supabase');
 const { UnauthorizedError, ForbiddenError } = require('./errorHandler');
 
+const AUTH_RETRY_COUNT = 2;
+const AUTH_RETRY_DELAY_MS = 200;
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withRetry(operation, retries = AUTH_RETRY_COUNT) {
+    let lastError;
+
+    for (let attempt = 0; attempt <= retries; attempt += 1) {
+        try {
+            return await operation();
+        } catch (error) {
+            lastError = error;
+            if (attempt < retries) {
+                await sleep(AUTH_RETRY_DELAY_MS * (attempt + 1));
+            }
+        }
+    }
+
+    throw lastError;
+}
+
+async function verifySupabaseUser(token) {
+    return withRetry(() => authClient.auth.getUser(token));
+}
+
+async function loadAdminProfile(userId) {
+    return withRetry(() =>
+        serviceClient
+            .from('profiles')
+            .select('id, email, full_name, role, active')
+            .eq('id', userId)
+            .maybeSingle()
+    );
+}
+
 // ============================================================
 // Authenticate Middleware
 // ============================================================
@@ -51,7 +89,7 @@ async function authenticate(req, res, next) {
         }
 
         // Verify token with Supabase Auth
-        const { data, error } = await authClient.auth.getUser(token);
+        const { data, error } = await verifySupabaseUser(token);
 
         if (error) {
             // Map Supabase Auth errors
@@ -72,11 +110,7 @@ async function authenticate(req, res, next) {
 
         // Verify user exists in profiles table and is an active admin.
         // Use the service role client here so this lookup is not blocked by RLS.
-        const { data: profile, error: profileError } = await serviceClient
-            .from('profiles')
-            .select('id, email, full_name, role, active')
-            .eq('id', supabaseUser.id)
-            .maybeSingle();
+        const { data: profile, error: profileError } = await loadAdminProfile(supabaseUser.id);
 
         if (profileError) {
             console.error('Profile lookup failed during admin authentication:', profileError);
@@ -160,18 +194,14 @@ async function optionalAuthenticate(req, res, next) {
             return next();
         }
 
-        const { data, error } = await authClient.auth.getUser(token);
+        const { data, error } = await verifySupabaseUser(token);
 
         if (error || !data || !data.user) {
             req.user = null;
             return next();
         }
 
-        const { data: profile, error: profileError } = await serviceClient
-            .from('profiles')
-            .select('id, email, full_name, role, active')
-            .eq('id', data.user.id)
-            .maybeSingle();
+        const { data: profile, error: profileError } = await loadAdminProfile(data.user.id);
 
         if (profileError || !profile || !profile.active || profile.role !== 'admin') {
             req.user = null;
