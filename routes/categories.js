@@ -19,18 +19,6 @@ const {
 } = require('../middleware/validate');
 
 // ============================================================
-// Public Routes
-// ============================================================
-
-// GET /api/categories
-// Get all active categories for public display
-router.get('/', categoryController.getAllCategories);
-
-// GET /api/categories/:slug
-// Get a single active category by slug
-router.get('/:slug', categoryController.getCategoryBySlug);
-
-// ============================================================
 // Admin Routes
 // ============================================================
 
@@ -77,6 +65,18 @@ router.delete(
     handleValidationResult,
     categoryController.deleteCategory
 );
+
+// ============================================================
+// Public Routes
+// ============================================================
+
+// GET /api/categories
+// Get all active categories for public display
+router.get('/', categoryController.getAllCategories);
+
+// GET /api/categories/:slug
+// Get a single active category by slug
+router.get('/:slug', categoryController.getCategoryBySlug);
 
 // ============================================================
 // Export
