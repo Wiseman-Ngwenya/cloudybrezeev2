@@ -11,7 +11,7 @@
 // 4. Attach user info to req.user for downstream use
 // ============================================================
 
-const { authClient } = require('../config/supabase');
+const { authClient, serviceClient } = require('../config/supabase');
 const { UnauthorizedError, ForbiddenError } = require('./errorHandler');
 
 // ============================================================
@@ -70,14 +70,20 @@ async function authenticate(req, res, next) {
 
         const supabaseUser = data.user;
 
-        // Verify user exists in profiles table and is an active admin
-        const { data: profile, error: profileError } = await authClient
+        // Verify user exists in profiles table and is an active admin.
+        // Use the service role client here so this lookup is not blocked by RLS.
+        const { data: profile, error: profileError } = await serviceClient
             .from('profiles')
             .select('id, email, full_name, role, active')
             .eq('id', supabaseUser.id)
-            .single();
+            .maybeSingle();
 
-        if (profileError || !profile) {
+        if (profileError) {
+            console.error('Profile lookup failed during admin authentication:', profileError);
+            throw new ForbiddenError('User profile not found. Admin access required.');
+        }
+
+        if (!profile) {
             throw new ForbiddenError(
                 'User profile not found. Admin access required.'
             );
@@ -161,11 +167,11 @@ async function optionalAuthenticate(req, res, next) {
             return next();
         }
 
-        const { data: profile, error: profileError } = await authClient
+        const { data: profile, error: profileError } = await serviceClient
             .from('profiles')
             .select('id, email, full_name, role, active')
             .eq('id', data.user.id)
-            .single();
+            .maybeSingle();
 
         if (profileError || !profile || !profile.active || profile.role !== 'admin') {
             req.user = null;
