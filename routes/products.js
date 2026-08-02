@@ -82,30 +82,6 @@ const imageValidationRules = [
 ];
 
 // ============================================================
-// Public Routes
-// ============================================================
-
-// GET /api/products
-// Get all active products with filtering and pagination
-router.get('/', productController.getAllProducts);
-
-// GET /api/products/featured
-// Get featured products for homepage
-router.get('/featured', productController.getFeaturedProducts);
-
-// GET /api/products/search
-// Search products by query string
-router.get('/search', productController.searchProducts);
-
-// GET /api/products/category/:slug
-// Get products by category slug
-router.get('/category/:slug', productController.getProductsByCategory);
-
-// GET /api/products/:slug
-// Get a single product by slug with all details
-router.get('/:slug', productController.getProductBySlug);
-
-// ============================================================
 // Admin Routes
 // ============================================================
 
@@ -220,6 +196,30 @@ router.delete(
     handleValidationResult,
     productController.removeProductVariant
 );
+
+// ============================================================
+// Public Routes
+// ============================================================
+
+// GET /api/products
+// Get all active products with filtering and pagination
+router.get('/', productController.getAllProducts);
+
+// GET /api/products/featured
+// Get featured products for homepage
+router.get('/featured', productController.getFeaturedProducts);
+
+// GET /api/products/search
+// Search products by query string
+router.get('/search', productController.searchProducts);
+
+// GET /api/products/category/:slug
+// Get products by category slug
+router.get('/category/:slug', productController.getProductsByCategory);
+
+// GET /api/products/:slug
+// Get a single product by slug with all details
+router.get('/:slug', productController.getProductBySlug);
 
 // ============================================================
 // Export
