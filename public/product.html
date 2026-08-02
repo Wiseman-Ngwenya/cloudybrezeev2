@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Product details - CloudyBreeze">
     <title>Product - CloudyBreeze</title>
-    <link rel="icon" href="images/favicon.png" type="image/png">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    <link rel="stylesheet" href="css/animations.css">
+    <link rel="icon" href="/images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/animations.css">
 </head>
 <body>
 
@@ -16,7 +16,7 @@
     <header class="site-header" id="siteHeader">
         <div class="container header-container">
             <a href="/" class="logo-link">
-                <img src="images/logo.png" alt="CloudyBreeze Logo" class="logo">
+                <img src="/images/logo.png" alt="CloudyBreeze Logo" class="logo">
             </a>
             <nav class="main-nav" id="mainNav">
                 <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu">
@@ -80,160 +80,33 @@
                     <a href="/">Home</a>
                     <span class="breadcrumb-separator">/</span>
                     <a href="/products">Products</a>
-                    <span class="breadcrumb-separator" id="breadcrumbCategorySep" style="display: none;">/</span>
-                    <a href="#" id="breadcrumbCategory" style="display: none;"></a>
                     <span class="breadcrumb-separator">/</span>
-                    <span class="breadcrumb-current" id="breadcrumbCurrent"></span>
+                    <span id="breadcrumbCurrent">Product</span>
                 </nav>
 
-                <div class="product-detail-layout">
-                    <!-- Product Images Gallery -->
-                    <div class="product-gallery" id="productGallery">
-                        <div class="gallery-main" id="galleryMain">
-                            <img src="" alt="" id="galleryMainImage">
-                        </div>
-                        <div class="gallery-thumbnails" id="galleryThumbnails">
-                            <!-- Thumbnails loaded dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Product Info -->
+                <div class="product-detail-grid">
+                    <div class="product-gallery" id="productGallery"></div>
                     <div class="product-info">
-                        <span class="product-category-tag" id="productCategoryTag"></span>
-                        <h1 class="product-title" id="productName"></h1>
-
-                        <!-- Pricing -->
-                        <div class="product-pricing" id="productPricing">
-                            <span class="product-price-lg" id="productPrice"></span>
-                            <span class="product-compare-price-lg" id="productComparePrice" style="display: none;"></span>
-                            <span class="product-discount-badge" id="productDiscountBadge" style="display: none;"></span>
+                        <h1 id="productName"></h1>
+                        <div class="product-meta" id="productMeta"></div>
+                        <div class="product-price-row">
+                            <span class="product-price" id="productPrice"></span>
+                            <span class="product-compare-price" id="productComparePrice"></span>
                         </div>
-
-                        <!-- Short Description -->
-                        <p class="product-short-desc" id="productShortDesc"></p>
-
-                        <!-- Variants Selection -->
-                        <div class="product-variants" id="productVariants" style="display: none;">
-                            <h4 class="variants-title">Options</h4>
-                            <div class="variants-options" id="variantsOptions">
-                                <!-- Variant buttons loaded dynamically -->
-                            </div>
-                        </div>
-
-                        <!-- Quantity -->
-                        <div class="product-quantity">
-                            <h4 class="quantity-title">Quantity</h4>
-                            <div class="quantity-selector">
-                                <button class="quantity-btn" id="quantityDecrease" aria-label="Decrease quantity">-</button>
-                                <input type="number" class="quantity-input" id="quantityInput" value="1" min="1" max="99" aria-label="Product quantity">
-                                <button class="quantity-btn" id="quantityIncrease" aria-label="Increase quantity">+</button>
-                            </div>
-                        </div>
-
-                        <!-- Add to Cart -->
+                        <p class="product-short-description" id="productShortDescription"></p>
+                        <div class="product-options" id="productOptions"></div>
                         <div class="product-actions">
-                            <button class="btn btn-primary btn-lg btn-full" id="addToCartBtn">
-                                Add to Cart - <span id="addToCartPrice"></span>
-                            </button>
-                        </div>
-
-                        <!-- Add to Cart Message -->
-                        <div class="cart-message" id="cartMessage" style="display: none;"></div>
-
-                        <!-- Product Meta -->
-                        <div class="product-meta" id="productMeta">
-                            <!-- SKU, Category, etc. loaded dynamically -->
+                            <button class="btn btn-primary" id="addToCartBtn">Add to Cart</button>
+                            <button class="btn btn-outline" id="buyNowBtn">Buy Now</button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Full Description -->
-                <div class="product-description" id="productDescription" style="display: none;">
-                    <h3 class="description-title">Description</h3>
-                    <div class="description-content" id="descriptionContent"></div>
-                </div>
             </div>
         </section>
-
-        <!-- Related Products (Same Category) -->
-        <section class="related-section" id="relatedSection" style="display: none;">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">You May Also Like</h2>
-                </div>
-                <div class="products-grid" id="relatedProducts">
-                    <!-- Loaded dynamically -->
-                </div>
-            </div>
-        </section>
-
     </main>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <img src="images/logo.png" alt="CloudyBreeze Logo" class="footer-logo">
-                    <p class="footer-tagline">
-                        Premium humidifiers and aroma diffusers for a healthier, more comfortable home.
-                    </p>
-                    <div class="footer-social" id="footerSocial"></div>
-                </div>
-                <div class="footer-links">
-                    <h4 class="footer-heading">Quick Links</h4>
-                    <ul>
-                        <li><a href="/products">All Products</a></li>
-                        <li><a href="/about">About Us</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                        <li><a href="/tracking">Track Order</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4 class="footer-heading">Customer Service</h4>
-                    <ul>
-                        <li><a href="/shipping">Shipping Policy</a></li>
-                        <li><a href="/refund">Refund Policy</a></li>
-                        <li><a href="/privacy">Privacy Policy</a></li>
-                        <li><a href="/terms">Terms of Service</a></li>
-                        <li><a href="/faq">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-contact">
-                    <h4 class="footer-heading">Contact Us</h4>
-                    <ul>
-                        <li class="footer-contact-item">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            <span id="footerEmail">hello@cloudybreeze.com</span>
-                        </li>
-                        <li class="footer-contact-item" id="footerPhoneWrapper">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                            </svg>
-                            <span id="footerPhone"></span>
-                        </li>
-                        <li class="footer-contact-item" id="footerAddressWrapper">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-                            <span id="footerAddress"></span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; <span id="currentYear"></span> CloudyBreeze. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="js/analytics.js"></script>
-    <script src="js/site.js"></script>
-    <script src="js/product.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/cart.js"></script>
+    <script src="/js/product.js"></script>
 </body>
 </html>
