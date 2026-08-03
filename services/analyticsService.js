@@ -6,6 +6,7 @@
 //
 // Responsibilities:
 // - Record page views and visitor data
+// - Record product views
 // - Aggregate visitor statistics
 // - Geographic and device analytics
 // - Product view tracking
@@ -36,8 +37,8 @@ const { ANALYTICS } = require('../utils/constants');
  * @param {string} [visitorData.browser] - Browser name
  * @param {string} [visitorData.operating_system] - OS name
  * @param {string} [visitorData.device] - Device type (desktop, mobile, tablet)
- * @param {string} [visitorData.page] - Page URL visited
- * @param {string} [visitorData.referrer] - Referrer URL
+ * @param {string} [visitorData.page] - Friendly page name
+ * @param {string} [visitorData.referrer] - Referrer URL or page name
  * @returns {Promise<void>} Resolves immediately, errors are caught silently
  */
 async function recordPageView(visitorData) {
@@ -53,7 +54,6 @@ async function recordPageView(visitorData) {
             referrer,
         } = visitorData;
 
-        // Skip recording if no page is provided
         if (!page) return;
 
         const { error } = await serviceClient
@@ -65,17 +65,69 @@ async function recordPageView(visitorData) {
                 browser: browser || null,
                 operating_system: operating_system || null,
                 device: device || null,
-                page: page.substring(0, 500), // Limit page URL length
-                referrer: referrer ? referrer.substring(0, 500) : null,
+                page: String(page).substring(0, 120),
+                referrer: referrer ? String(referrer).substring(0, 500) : null,
             });
 
         if (error) {
-            // Log but don't throw - analytics failures are non-critical
             console.error('Analytics: Failed to record page view:', error.message);
         }
     } catch (err) {
-        // Catch all errors to prevent analytics from breaking the app
         console.error('Analytics: Unexpected error recording page view:', err.message);
+    }
+}
+
+/**
+ * Record a product view in the product_views table.
+ * Failures are logged but never thrown to the caller.
+ *
+ * @param {Object} viewData
+ * @param {string} viewData.product_id
+ * @param {string} [viewData.session_id]
+ * @param {string} [viewData.page_path]
+ * @param {string} [viewData.referrer]
+ * @param {string} [viewData.country]
+ * @param {string} [viewData.city]
+ * @param {string} [viewData.browser]
+ * @param {string} [viewData.operating_system]
+ * @param {string} [viewData.device]
+ * @returns {Promise<void>}
+ */
+async function recordProductView(viewData) {
+    try {
+        const {
+            product_id,
+            session_id,
+            page_path,
+            referrer,
+            country,
+            city,
+            browser,
+            operating_system,
+            device,
+        } = viewData;
+
+        if (!product_id) return;
+
+        const { error } = await serviceClient
+            .from('product_views')
+            .insert({
+                product_id,
+                session_id: session_id || null,
+                page_path: page_path || null,
+                referrer: referrer || null,
+                country: country || null,
+                city: city || null,
+                browser: browser || null,
+                operating_system: operating_system || null,
+                device: device || null,
+            });
+
+        if (error) {
+            console.error('Analytics: Failed to record product view:', error.message);
+        }
+    } catch (err) {
+        console.error('Analytics: Unexpected error recording product view:', err.message);
     }
 }
 
@@ -94,52 +146,44 @@ async function getOverview() {
     const thisWeek = getDateRange('week');
     const thisMonth = getDateRange('month');
 
-    // Today's visitors
     const { count: visitorsToday } = await serviceClient
         .from('visitors')
         .select('*', { count: 'exact', head: true })
         .gte('visited_at', today.startDate)
         .lte('visited_at', today.endDate);
 
-    // This week's visitors
     const { count: visitorsThisWeek } = await serviceClient
         .from('visitors')
         .select('*', { count: 'exact', head: true })
         .gte('visited_at', thisWeek.startDate)
         .lte('visited_at', thisWeek.endDate);
 
-    // This month's visitors
     const { count: visitorsThisMonth } = await serviceClient
         .from('visitors')
         .select('*', { count: 'exact', head: true })
         .gte('visited_at', thisMonth.startDate)
         .lte('visited_at', thisMonth.endDate);
 
-    // Total visitors
     const { count: totalVisitors } = await serviceClient
         .from('visitors')
         .select('*', { count: 'exact', head: true });
 
-    // Today's orders
     const { count: ordersToday } = await serviceClient
         .from('orders')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', today.startDate)
         .lte('created_at', today.endDate);
 
-    // This month's orders
     const { count: ordersThisMonth } = await serviceClient
         .from('orders')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', thisMonth.startDate)
         .lte('created_at', thisMonth.endDate);
 
-    // Total orders
     const { count: totalOrders } = await serviceClient
         .from('orders')
         .select('*', { count: 'exact', head: true });
 
-    // This month's revenue
     const { data: revenueData } = await serviceClient
         .from('orders')
         .select('total')
@@ -151,14 +195,12 @@ async function getOverview() {
         ? revenueData.reduce((sum, order) => sum + parseFloat(order.total), 0)
         : 0;
 
-    // Recent visitors
     const { data: recentVisitors } = await serviceClient
         .from('visitors')
         .select('*')
         .order('visited_at', { ascending: false })
         .limit(ANALYTICS.RECENT_VISITORS_LIMIT);
 
-    // Recent orders
     const { data: recentOrders } = await serviceClient
         .from('orders')
         .select('id, order_number, customer_name, total, status, payment_status, created_at')
@@ -189,12 +231,6 @@ async function getOverview() {
 // Visitor Statistics
 // ============================================================
 
-/**
- * Get daily visitor counts for a given period.
- *
- * @param {string} [period='month'] - 'week', 'month', or 'year'
- * @returns {Promise<Array>} Daily visitor counts
- */
 async function getDailyVisitors(period = 'month') {
     const { startDate, endDate } = getDateRange(period);
 
@@ -210,25 +246,17 @@ async function getDailyVisitors(period = 'month') {
         return [];
     }
 
-    // Group by date
     const dailyCounts = {};
     data.forEach((visitor) => {
         const date = visitor.visited_at.split('T')[0];
         dailyCounts[date] = (dailyCounts[date] || 0) + 1;
     });
 
-    // Convert to array format
     return Object.entries(dailyCounts)
         .map(([date, count]) => ({ date, count }))
         .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-/**
- * Get top countries by visitor count.
- *
- * @param {number} [limit=10] - Maximum results
- * @returns {Promise<Array>} Countries with visitor counts
- */
 async function getTopCountries(limit = ANALYTICS.TOP_COUNTRIES_LIMIT) {
     const { data, error } = await serviceClient
         .from('visitors')
@@ -240,7 +268,6 @@ async function getTopCountries(limit = ANALYTICS.TOP_COUNTRIES_LIMIT) {
         return [];
     }
 
-    // Count by country
     const countryCounts = {};
     data.forEach((visitor) => {
         if (visitor.country) {
@@ -248,18 +275,12 @@ async function getTopCountries(limit = ANALYTICS.TOP_COUNTRIES_LIMIT) {
         }
     });
 
-    // Sort and limit
     return Object.entries(countryCounts)
         .map(([country, count]) => ({ country, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, limit);
 }
 
-/**
- * Get device type distribution.
- *
- * @returns {Promise<Object>} Device type counts (desktop, mobile, tablet)
- */
 async function getDeviceStats() {
     const { data, error } = await serviceClient
         .from('visitors')
@@ -281,11 +302,6 @@ async function getDeviceStats() {
     return deviceCounts;
 }
 
-/**
- * Get browser distribution.
- *
- * @returns {Promise<Object>} Browser usage counts
- */
 async function getBrowserStats() {
     const { data, error } = await serviceClient
         .from('visitors')
@@ -304,7 +320,6 @@ async function getBrowserStats() {
         }
     });
 
-    // Sort by count descending
     return Object.entries(browserCounts)
         .sort(([, a], [, b]) => b - a)
         .reduce((obj, [key, value]) => {
@@ -313,11 +328,6 @@ async function getBrowserStats() {
         }, {});
 }
 
-/**
- * Get operating system distribution.
- *
- * @returns {Promise<Object>} OS usage counts
- */
 async function getOperatingSystemStats() {
     const { data, error } = await serviceClient
         .from('visitors')
@@ -348,12 +358,6 @@ async function getOperatingSystemStats() {
 // Page Analytics
 // ============================================================
 
-/**
- * Get top viewed pages.
- *
- * @param {number} [limit=10] - Maximum results
- * @returns {Promise<Array>} Pages with view counts
- */
 async function getTopPages(limit = ANALYTICS.TOP_PAGES_LIMIT) {
     const { data, error } = await serviceClient
         .from('visitors')
@@ -368,9 +372,8 @@ async function getTopPages(limit = ANALYTICS.TOP_PAGES_LIMIT) {
     const pageCounts = {};
     data.forEach((visitor) => {
         if (visitor.page) {
-            // Normalize page URL (remove query strings)
-            const normalizedPage = visitor.page.split('?')[0];
-            pageCounts[normalizedPage] = (pageCounts[normalizedPage] || 0) + 1;
+            const page = String(visitor.page).trim();
+            pageCounts[page] = (pageCounts[page] || 0) + 1;
         }
     });
 
@@ -380,12 +383,6 @@ async function getTopPages(limit = ANALYTICS.TOP_PAGES_LIMIT) {
         .slice(0, limit);
 }
 
-/**
- * Get top referrers.
- *
- * @param {number} [limit=10] - Maximum results
- * @returns {Promise<Array>} Referrers with visitor counts
- */
 async function getTopReferrers(limit = 10) {
     const { data, error } = await serviceClient
         .from('visitors')
@@ -414,18 +411,11 @@ async function getTopReferrers(limit = 10) {
 // Product Analytics
 // ============================================================
 
-/**
- * Get product page view statistics.
- *
- * @param {number} [limit=10] - Maximum results
- * @returns {Promise<Array>} Products with view counts
- */
 async function getProductViewStats(limit = ANALYTICS.TOP_PRODUCTS_LIMIT) {
     const { data, error } = await serviceClient
-        .from('visitors')
-        .select('page')
-        .like('page', '/product%')
-        .order('visited_at', { ascending: false })
+        .from('product_views')
+        .select('product_id')
+        .order('viewed_at', { ascending: false })
         .limit(5000);
 
     if (error) {
@@ -433,36 +423,30 @@ async function getProductViewStats(limit = ANALYTICS.TOP_PRODUCTS_LIMIT) {
         return [];
     }
 
-    // Extract product slugs from URLs
     const productCounts = {};
-    data.forEach((visitor) => {
-        const match = visitor.page.match(/\/product(?:s)?\/([^/?]+)/);
-        if (match && match[1]) {
-            const slug = match[1];
-            productCounts[slug] = (productCounts[slug] || 0) + 1;
+    data.forEach((view) => {
+        if (view.product_id) {
+            productCounts[view.product_id] = (productCounts[view.product_id] || 0) + 1;
         }
     });
 
-    // Sort by view count
-    const sortedSlugs = Object.entries(productCounts)
+    const sortedProductIds = Object.entries(productCounts)
         .sort(([, a], [, b]) => b - a)
         .slice(0, limit)
-        .map(([slug]) => slug);
+        .map(([productId]) => productId);
 
-    if (sortedSlugs.length === 0) return [];
+    if (sortedProductIds.length === 0) return [];
 
-    // Fetch product details
     const { data: products } = await serviceClient
         .from('products')
         .select('id, name, slug, price, cover_image, active')
-        .in('slug', sortedSlugs);
+        .in('id', sortedProductIds);
 
     if (!products) return [];
 
-    // Map view counts to products
-    return sortedSlugs
-        .map((slug) => {
-            const product = products.find((p) => p.slug === slug);
+    return sortedProductIds
+        .map((productId) => {
+            const product = products.find((p) => p.id === productId);
             return product
                 ? {
                       id: product.id,
@@ -471,7 +455,7 @@ async function getProductViewStats(limit = ANALYTICS.TOP_PRODUCTS_LIMIT) {
                       price: product.price,
                       coverImage: product.cover_image,
                       active: product.active,
-                      views: productCounts[slug],
+                      views: productCounts[productId],
                   }
                 : null;
         })
@@ -482,12 +466,6 @@ async function getProductViewStats(limit = ANALYTICS.TOP_PRODUCTS_LIMIT) {
 // Unique Visitors
 // ============================================================
 
-/**
- * Get unique visitor count by IP address for a period.
- *
- * @param {string} [period='month'] - 'today', 'week', 'month', or 'year'
- * @returns {Promise<number>} Unique visitor count
- */
 async function getUniqueVisitors(period = 'month') {
     const { startDate, endDate } = getDateRange(period);
 
@@ -503,7 +481,6 @@ async function getUniqueVisitors(period = 'month') {
         return 0;
     }
 
-    // Count unique IP addresses
     const uniqueIps = new Set(data.map((v) => v.ip_address));
     return uniqueIps.size;
 }
@@ -513,6 +490,7 @@ async function getUniqueVisitors(period = 'month') {
 // ============================================================
 module.exports = {
     recordPageView,
+    recordProductView,
     getOverview,
     getDailyVisitors,
     getTopCountries,
