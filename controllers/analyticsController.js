@@ -42,6 +42,25 @@ function inferCountry(req) {
     );
 }
 
+function pageNameFromPath(pagePath) {
+    const path = normalizePath(pagePath);
+    const namedRoutes = {
+        '/': 'Home',
+        '/about': 'About',
+        '/products': 'Products',
+        '/contact': 'Contact',
+        '/cart': 'Cart',
+        '/checkout': 'Checkout',
+        '/tracking': 'Track Order',
+        '/shipping': 'Shipping',
+        '/terms': 'Terms',
+        '/refund-policy': 'Refund Policy',
+        '/privacy-policy': 'Privacy Policy',
+    };
+
+    return namedRoutes[path] || path;
+}
+
 // ============================================================
 // Public Controllers
 // ============================================================
@@ -60,6 +79,8 @@ const recordPageView = asyncHandler(async (req, res) => {
         req.socket?.remoteAddress ||
         null;
 
+    const pagePath = normalizePath(req.body.page || req.headers.referer || req.headers.referrer || req.originalUrl || '/');
+
     const visitorData = {
         ip_address: ipAddress,
         country: inferCountry(req),
@@ -67,12 +88,43 @@ const recordPageView = asyncHandler(async (req, res) => {
         browser: req.body.browser || null,
         operating_system: req.body.operating_system || null,
         device: req.body.device || null,
-        page: normalizePath(req.body.page || req.headers.referer || req.headers.referrer || req.originalUrl || '/'),
+        page: pageNameFromPath(pagePath),
         referrer: req.body.referrer ? normalizePath(req.body.referrer) : (req.headers.referer ? normalizePath(req.headers.referer) : null),
     };
 
     analyticsService.recordPageView(visitorData).catch((err) => {
         console.error('Analytics page view recording failed:', err.message);
+    });
+
+    res.status(200).json({
+        success: true,
+        data: { recorded: true },
+    });
+});
+
+/**
+ * POST /api/analytics/product-view
+ *
+ * Record a product view in the product_views table.
+ */
+const recordProductView = asyncHandler(async (req, res) => {
+    const ipAddress =
+        req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        req.ip ||
+        req.socket?.remoteAddress ||
+        null;
+
+    await analyticsService.recordProductView({
+        product_id: req.body.product_id,
+        session_id: req.body.session_id || null,
+        page_path: normalizePath(req.body.page_path || req.originalUrl || '/'),
+        referrer: req.body.referrer ? normalizePath(req.body.referrer) : (req.headers.referer ? normalizePath(req.headers.referer) : null),
+        country: inferCountry(req),
+        city: req.body.city || null,
+        browser: req.body.browser || null,
+        operating_system: req.body.operating_system || null,
+        device: req.body.device || null,
+        ip_address: ipAddress,
     });
 
     res.status(200).json({
@@ -144,6 +196,7 @@ const getProductStats = asyncHandler(async (req, res) => {
 
 module.exports = {
     recordPageView,
+    recordProductView,
     getOverview,
     getVisitorStats,
     getGeographyStats,
