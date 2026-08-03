@@ -3,18 +3,44 @@
 // Analytics Controller
 // ============================================================
 // Handles HTTP request/response for analytics operations.
-//
-// Responsibilities:
-// - Parse request inputs and visitor data
-// - Call analytics service layer
-// - Format and send responses
-// - Fire-and-forget page view recording
-// - No business logic (delegated to analyticsService)
 // ============================================================
 
 const analyticsService = require('../services/analyticsService');
 const { successResponse } = require('../utils/helpers');
 const { asyncHandler } = require('../middleware/errorHandler');
+
+function normalizePath(value) {
+    if (!value) return '/';
+
+    let normalized = String(value).trim();
+
+    try {
+        if (/^https?:\/\//i.test(normalized)) {
+            normalized = new URL(normalized).pathname;
+        }
+    } catch (_) {
+        // Ignore invalid URLs and fall back to raw string
+    }
+
+    normalized = normalized.split('?')[0].split('#')[0] || '/';
+
+    if (normalized.length > 1) {
+        normalized = normalized.replace(/\/+$/, '');
+    }
+
+    return normalized || '/';
+}
+
+function inferCountry(req) {
+    return (
+        req.body.country ||
+        req.headers['cf-ipcountry'] ||
+        req.headers['x-vercel-ip-country'] ||
+        req.headers['x-country-code'] ||
+        req.headers['x-country'] ||
+        null
+    );
+}
 
 // ============================================================
 // Public Controllers
@@ -26,12 +52,8 @@ const { asyncHandler } = require('../middleware/errorHandler');
  * Record a page view from the frontend.
  * This endpoint is designed to be called asynchronously from the browser.
  * It always returns 200 OK immediately, even if recording fails.
- *
- * Body: { page, referrer?, browser?, operating_system?, device?, country?, city? }
- * Returns: { recorded: true } always
  */
 const recordPageView = asyncHandler(async (req, res) => {
-    // Extract IP address from request
     const ipAddress =
         req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
         req.ip ||
@@ -40,22 +62,19 @@ const recordPageView = asyncHandler(async (req, res) => {
 
     const visitorData = {
         ip_address: ipAddress,
-        country: req.body.country || null,
+        country: inferCountry(req),
         city: req.body.city || null,
         browser: req.body.browser || null,
         operating_system: req.body.operating_system || null,
         device: req.body.device || null,
-        page: req.body.page || req.headers.referer || '/',
-        referrer: req.body.referrer || null,
+        page: normalizePath(req.body.page || req.headers.referer || req.headers.referrer || req.originalUrl || '/'),
+        referrer: req.body.referrer ? normalizePath(req.body.referrer) : (req.headers.referer ? normalizePath(req.headers.referer) : null),
     };
 
-    // Fire-and-forget: Don't await, don't block the response
     analyticsService.recordPageView(visitorData).catch((err) => {
-        // Logging only; error already handled inside service
         console.error('Analytics page view recording failed:', err.message);
     });
 
-    // Always return success immediately
     res.status(200).json({
         success: true,
         data: { recorded: true },
@@ -66,27 +85,11 @@ const recordPageView = asyncHandler(async (req, res) => {
 // Admin Controllers
 // ============================================================
 
-/**
- * GET /api/admin/analytics/overview
- *
- * Get dashboard overview statistics.
- * Returns: { visitors, orders, revenue, recentVisitors, recentOrders }
- */
 const getOverview = asyncHandler(async (req, res) => {
     const overview = await analyticsService.getOverview();
-
-    res.status(200).json(
-        successResponse(overview)
-    );
+    res.status(200).json(successResponse(overview));
 });
 
-/**
- * GET /api/admin/analytics/visitors
- *
- * Get visitor statistics.
- * Query params: period (today, week, month, year)
- * Returns: { dailyVisitors, uniqueVisitors, deviceStats, browserStats, osStats }
- */
 const getVisitorStats = asyncHandler(async (req, res) => {
     const period = req.query.period || 'month';
 
@@ -110,16 +113,8 @@ const getVisitorStats = asyncHandler(async (req, res) => {
     );
 });
 
-/**
- * GET /api/admin/analytics/geography
- *
- * Get geographic analytics.
- * Returns: { topCountries }
- */
 const getGeographyStats = asyncHandler(async (req, res) => {
-    const [topCountries] = await Promise.all([
-        analyticsService.getTopCountries(),
-    ]);
+    const [topCountries] = await Promise.all([analyticsService.getTopCountries()]);
 
     res.status(200).json(
         successResponse({
@@ -128,12 +123,6 @@ const getGeographyStats = asyncHandler(async (req, res) => {
     );
 });
 
-/**
- * GET /api/admin/analytics/pages
- *
- * Get page view statistics.
- * Returns: { topPages, topReferrers }
- */
 const getPageStats = asyncHandler(async (req, res) => {
     const [topPages, topReferrers] = await Promise.all([
         analyticsService.getTopPages(),
@@ -148,25 +137,11 @@ const getPageStats = asyncHandler(async (req, res) => {
     );
 });
 
-/**
- * GET /api/admin/analytics/products
- *
- * Get product view statistics.
- * Returns: { productViews } - Products with view counts
- */
 const getProductStats = asyncHandler(async (req, res) => {
     const productViews = await analyticsService.getProductViewStats();
-
-    res.status(200).json(
-        successResponse({
-            productViews,
-        })
-    );
+    res.status(200).json(successResponse({ productViews }));
 });
 
-// ============================================================
-// Export
-// ============================================================
 module.exports = {
     recordPageView,
     getOverview,
