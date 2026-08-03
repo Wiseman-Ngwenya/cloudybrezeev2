@@ -10,6 +10,7 @@
 // - Add to cart
 // - Buy now
 // - Related products
+// - Product view analytics
 // ============================================================
 
 (function () {
@@ -19,6 +20,9 @@
     var selectedVariant = null;
     var quantity = 1;
     var isBuyingNow = false;
+    var productViewTracked = false;
+
+    var ANALYTICS_SESSION_KEY = 'cloudyBreezeAnalyticsSessionId';
 
     var productLoading = document.getElementById('productLoading');
     var productError = document.getElementById('productError');
@@ -59,6 +63,76 @@
         var path = window.location.pathname.replace(/\/+$/, '');
         var parts = path.split('/');
         return parts[parts.length - 1];
+    }
+
+    function getOrCreateSessionId() {
+        try {
+            var existing = localStorage.getItem(ANALYTICS_SESSION_KEY);
+            if (existing) return existing;
+
+            var sessionId = (window.crypto && window.crypto.randomUUID)
+                ? window.crypto.randomUUID()
+                : 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+
+            localStorage.setItem(ANALYTICS_SESSION_KEY, sessionId);
+            return sessionId;
+        } catch (err) {
+            return 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+        }
+    }
+
+    function getBrowserName() {
+        var ua = navigator.userAgent || '';
+        if (/Edg\//i.test(ua)) return 'Edge';
+        if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) return 'Chrome';
+        if (/Firefox\//i.test(ua)) return 'Firefox';
+        if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) return 'Safari';
+        return 'Unknown';
+    }
+
+    function getOperatingSystem() {
+        var platform = (navigator.platform || '').toLowerCase();
+        var ua = navigator.userAgent || '';
+
+        if (/win/.test(platform)) return 'Windows';
+        if (/mac/.test(platform)) return 'macOS';
+        if (/linux/.test(platform)) return 'Linux';
+        if (/android/i.test(ua)) return 'Android';
+        if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+        return 'Unknown';
+    }
+
+    function getDeviceType() {
+        var ua = navigator.userAgent || '';
+        if (/ipad|tablet/i.test(ua)) return 'tablet';
+        if (/mobi|android|iphone|ipod/i.test(ua)) return 'mobile';
+        return 'desktop';
+    }
+
+    function trackProductViewOnce() {
+        if (productViewTracked || !product || !product.id) return;
+        productViewTracked = true;
+
+        var payload = {
+            product_id: product.id,
+            session_id: getOrCreateSessionId(),
+            page_path: window.location.pathname,
+            referrer: document.referrer || null,
+            browser: getBrowserName(),
+            operating_system: getOperatingSystem(),
+            device: getDeviceType(),
+        };
+
+        fetch('/api/analytics/product-view', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+            keepalive: true,
+        }).catch(function (err) {
+            console.error('Failed to record product view:', err);
+        });
     }
 
     function loadProduct() {
@@ -132,6 +206,7 @@
         updateAddToCartPrice();
         renderMeta();
         setAvailabilityBadge();
+        trackProductViewOnce();
 
         if (product.description && productDescription && descriptionContent) {
             productDescription.style.display = 'block';
