@@ -10,10 +10,212 @@
     <link rel="stylesheet" href="../css/responsive.css">
     <link rel="stylesheet" href="../css/animations.css">
     <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .analytics-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chart-toggle-group {
+            display: inline-flex;
+            gap: 8px;
+            padding: 6px;
+            border-radius: 999px;
+            background: var(--color-off-white);
+            border: 1px solid var(--color-light-gray);
+        }
+
+        .chart-toggle-btn {
+            border: 0;
+            background: transparent;
+            color: var(--color-dark-gray);
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .chart-toggle-btn.active {
+            background: var(--color-primary);
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(44, 122, 123, 0.22);
+        }
+
+        .analytics-chart-shell {
+            position: relative;
+            min-height: 360px;
+        }
+
+        .analytics-chart-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .analytics-chart-title {
+            margin: 0;
+        }
+
+        .analytics-chart-subtitle {
+            color: var(--color-text-light);
+            font-size: 0.92rem;
+            margin: 4px 0 0;
+        }
+
+        .daily-chart {
+            height: 320px;
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            padding: 18px 10px 8px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(180deg, rgba(44, 122, 123, 0.03), rgba(44, 122, 123, 0.01));
+            border: 1px solid var(--color-light-gray);
+            overflow: hidden;
+        }
+
+        .daily-chart.empty {
+            align-items: center;
+            justify-content: center;
+        }
+
+        .daily-bar-item {
+            flex: 1;
+            min-width: 36px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .daily-bar-track {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            min-height: 220px;
+        }
+
+        .daily-bar-fill {
+            width: 100%;
+            max-width: 48px;
+            border-radius: 14px 14px 4px 4px;
+            background: linear-gradient(180deg, var(--color-primary), rgba(44, 122, 123, 0.48));
+            box-shadow: 0 12px 24px rgba(44, 122, 123, 0.18);
+            min-height: 4px;
+            transition: height 220ms ease;
+        }
+
+        .daily-bar-label,
+        .daily-bar-value {
+            display: block;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .daily-bar-label {
+            font-size: 0.84rem;
+            color: var(--color-text-light);
+            white-space: nowrap;
+        }
+
+        .daily-bar-value {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .daily-line-wrap {
+            position: relative;
+            height: 320px;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(44, 122, 123, 0.03), rgba(44, 122, 123, 0.01));
+            border: 1px solid var(--color-light-gray);
+        }
+
+        .daily-line-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .daily-line-axes {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .daily-line-gridline {
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-top: 1px dashed rgba(0, 0, 0, 0.08);
+        }
+
+        .daily-line-labels {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 10px;
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(0, 1fr);
+            gap: 10px;
+            align-items: end;
+        }
+
+        .daily-line-labels span {
+            font-size: 0.84rem;
+            color: var(--color-text-light);
+            text-align: center;
+            white-space: nowrap;
+            transform: translateY(10px);
+        }
+
+        .chart-tooltip-note {
+            color: var(--color-text-light);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .analytics-toolbar {
+                align-items: flex-start;
+            }
+
+            .daily-chart {
+                gap: 8px;
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+
+            .daily-bar-item {
+                min-width: 28px;
+            }
+
+            .daily-bar-label {
+                font-size: 0.72rem;
+            }
+
+            .daily-bar-value {
+                font-size: 0.76rem;
+            }
+        }
+    </style>
 </head>
 <body class="admin-body">
 
-    <!-- Admin Sidebar -->
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-header">
             <a href="/admin/dashboard.html" class="admin-sidebar-logo">
@@ -39,7 +241,6 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <div class="admin-main">
         <header class="admin-topbar">
             <div class="admin-topbar-left">
@@ -51,56 +252,44 @@
         </header>
 
         <div class="admin-content">
-            <!-- Period Selector -->
             <div class="admin-card admin-filters">
-                <div class="admin-filters-row">
-                    <select class="form-select" id="periodSelect" style="width:auto;">
-                        <option value="week">This Week</option>
-                        <option value="month" selected>This Month</option>
-                        <option value="year">This Year</option>
-                    </select>
+                <div class="analytics-toolbar">
+                    <div class="admin-filters-row" style="margin:0;">
+                        <select class="form-select" id="periodSelect" style="width:auto;">
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                    </div>
+                    <div class="chart-toggle-group" role="tablist" aria-label="Chart type">
+                        <button class="chart-toggle-btn active" id="barChartBtn" type="button">Bar</button>
+                        <button class="chart-toggle-btn" id="lineChartBtn" type="button">Line</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Visitor Stats -->
             <div class="admin-card">
-                <div class="admin-card-header"><h2 class="admin-card-title">Daily Visitors</h2></div>
+                <div class="admin-card-header analytics-chart-meta">
+                    <div>
+                        <h2 class="admin-card-title analytics-chart-title">Daily Visitors</h2>
+                        <p class="analytics-chart-subtitle">Switch between a bar view and a smooth line view.</p>
+                    </div>
+                    <span class="chart-tooltip-note">Hover or inspect the values directly in the chart.</span>
+                </div>
                 <div class="admin-card-body">
-                    <div class="admin-chart" id="dailyVisitorsChart">
+                    <div class="analytics-chart-shell" id="dailyVisitorsChartShell">
                         <p class="text-muted">Loading...</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Stats Grid -->
             <div class="admin-stats-grid" style="margin-bottom: var(--spacing-xl);">
-                <div class="admin-stat-card">
-                    <div class="admin-stat-info">
-                        <span class="admin-stat-label">Unique Visitors</span>
-                        <span class="admin-stat-value" id="statUniqueVisitors">0</span>
-                    </div>
-                </div>
-                <div class="admin-stat-card">
-                    <div class="admin-stat-info">
-                        <span class="admin-stat-label">Top Browser</span>
-                        <span class="admin-stat-value" id="statTopBrowser">-</span>
-                    </div>
-                </div>
-                <div class="admin-stat-card">
-                    <div class="admin-stat-info">
-                        <span class="admin-stat-label">Top OS</span>
-                        <span class="admin-stat-value" id="statTopOS">-</span>
-                    </div>
-                </div>
-                <div class="admin-stat-card">
-                    <div class="admin-stat-info">
-                        <span class="admin-stat-label">Top Device</span>
-                        <span class="admin-stat-value" id="statTopDevice">-</span>
-                    </div>
-                </div>
+                <div class="admin-stat-card"><div class="admin-stat-info"><span class="admin-stat-label">Unique Visitors</span><span class="admin-stat-value" id="statUniqueVisitors">0</span></div></div>
+                <div class="admin-stat-card"><div class="admin-stat-info"><span class="admin-stat-label">Top Browser</span><span class="admin-stat-value" id="statTopBrowser">-</span></div></div>
+                <div class="admin-stat-card"><div class="admin-stat-info"><span class="admin-stat-label">Top OS</span><span class="admin-stat-value" id="statTopOS">-</span></div></div>
+                <div class="admin-stat-card"><div class="admin-stat-info"><span class="admin-stat-label">Top Device</span><span class="admin-stat-value" id="statTopDevice">-</span></div></div>
             </div>
 
-            <!-- Device & Browser Stats -->
             <div class="admin-grid-2col">
                 <div class="admin-card">
                     <div class="admin-card-header"><h2 class="admin-card-title">Browsers</h2></div>
@@ -112,7 +301,6 @@
                 </div>
             </div>
 
-            <!-- Top Countries -->
             <div class="admin-card">
                 <div class="admin-card-header"><h2 class="admin-card-title">Top Countries</h2></div>
                 <div class="admin-card-body">
@@ -125,7 +313,6 @@
                 </div>
             </div>
 
-            <!-- Top Pages -->
             <div class="admin-card">
                 <div class="admin-card-header"><h2 class="admin-card-title">Top Pages</h2></div>
                 <div class="admin-card-body">
@@ -138,7 +325,6 @@
                 </div>
             </div>
 
-            <!-- Product Views -->
             <div class="admin-card">
                 <div class="admin-card-header"><h2 class="admin-card-title">Most Viewed Products</h2></div>
                 <div class="admin-card-body">
@@ -163,18 +349,42 @@
                 return;
             }
 
+            var chartState = {
+                mode: 'bar',
+                dailyVisitors: [],
+            };
+
             document.addEventListener('DOMContentLoaded', function () {
                 setAdminUserName();
                 initSidebar();
                 initLogout();
-                loadAllAnalytics();
                 initPeriodSelector();
+                initChartToggle();
+                loadAllAnalytics();
             });
 
             function initPeriodSelector() {
                 document.getElementById('periodSelect').addEventListener('change', function () {
                     loadAllAnalytics();
                 });
+            }
+
+            function initChartToggle() {
+                document.getElementById('barChartBtn').addEventListener('click', function () {
+                    chartState.mode = 'bar';
+                    updateChartToggleButtons();
+                    renderDailyChart();
+                });
+                document.getElementById('lineChartBtn').addEventListener('click', function () {
+                    chartState.mode = 'line';
+                    updateChartToggleButtons();
+                    renderDailyChart();
+                });
+            }
+
+            function updateChartToggleButtons() {
+                document.getElementById('barChartBtn').classList.toggle('active', chartState.mode === 'bar');
+                document.getElementById('lineChartBtn').classList.toggle('active', chartState.mode === 'line');
             }
 
             function getPeriod() {
@@ -194,25 +404,20 @@
                 window.CloudyBreezeAdmin.apiGet('/api/analytics/admin/visitors?period=' + period)
                     .then(function (result) {
                         if (!result.success) return;
-                        var data = result.data;
+                        var data = result.data || {};
+                        chartState.dailyVisitors = data.dailyVisitors || [];
+                        renderDailyChart();
 
-                        // Daily visitors chart
-                        renderDailyChart(data.dailyVisitors);
-
-                        // Unique visitors
                         document.getElementById('statUniqueVisitors').textContent = data.uniqueVisitors || 0;
 
-                        // Top browser
                         var browsers = data.browserStats || {};
                         var topBrowser = Object.entries(browsers).sort(function (a, b) { return b[1] - a[1]; })[0];
                         document.getElementById('statTopBrowser').textContent = topBrowser ? topBrowser[0] : '-';
 
-                        // Top OS
                         var osStats = data.osStats || {};
                         var topOS = Object.entries(osStats).sort(function (a, b) { return b[1] - a[1]; })[0];
                         document.getElementById('statTopOS').textContent = topOS ? topOS[0] : '-';
 
-                        // Top device
                         var devices = data.deviceStats || {};
                         var topDevice = Object.entries(devices).sort(function (a, b) { return b[1] - a[1]; })[0];
                         document.getElementById('statTopDevice').textContent = topDevice ? topDevice[0] : '-';
@@ -220,35 +425,129 @@
                     .catch(function (err) { console.error(err); });
             }
 
-            function renderDailyChart(dailyVisitors) {
-                var container = document.getElementById('dailyVisitorsChart');
-                if (!dailyVisitors || dailyVisitors.length === 0) {
-                    container.innerHTML = '<p class="text-muted">No visitor data yet.</p>';
+            function renderDailyChart() {
+                var shell = document.getElementById('dailyVisitorsChartShell');
+                var dailyVisitors = chartState.dailyVisitors || [];
+
+                if (!dailyVisitors.length) {
+                    shell.innerHTML = '<p class="text-muted">No visitor data yet.</p>';
                     return;
                 }
 
+                if (chartState.mode === 'bar') {
+                    shell.innerHTML = renderBarChartHtml(dailyVisitors);
+                    return;
+                }
+
+                shell.innerHTML = renderLineChartHtml(dailyVisitors);
+            }
+
+            function renderBarChartHtml(dailyVisitors) {
                 var maxVal = Math.max.apply(null, dailyVisitors.map(function (d) { return d.count; }));
                 if (maxVal === 0) maxVal = 1;
 
-                var html = '<div class="admin-bar-chart">';
-                dailyVisitors.forEach(function (day) {
-                    var height = Math.round((day.count / maxVal) * 100);
-                    var dateLabel = day.date.split('-').slice(1).join('/');
-                    html += '<div class="admin-bar-item">' +
-                        '<div class="admin-bar" style="height:' + height + '%;" title="' + day.date + ': ' + day.count + ' visitors"></div>' +
-                        '<span class="admin-bar-label">' + dateLabel + '</span>' +
-                        '<span class="admin-bar-value">' + day.count + '</span>' +
+                var bars = dailyVisitors.map(function (day) {
+                    var height = Math.max(4, Math.round((day.count / maxVal) * 100));
+                    var label = day.date.split('-').slice(1).join('/');
+                    return '<div class="daily-bar-item">' +
+                        '<div class="daily-bar-track">' +
+                            '<div class="daily-bar-fill" style="height:' + height + '%;" title="' + day.date + ': ' + day.count + ' visitors"></div>' +
+                        '</div>' +
+                        '<span class="daily-bar-label">' + label + '</span>' +
+                        '<span class="daily-bar-value">' + day.count + '</span>' +
                     '</div>';
+                }).join('');
+
+                return '<div class="daily-chart">' + bars + '</div>';
+            }
+
+            function renderLineChartHtml(dailyVisitors) {
+                var points = dailyVisitors.map(function (day) { return Number(day.count) || 0; });
+                var maxVal = Math.max.apply(null, points);
+                if (maxVal === 0) maxVal = 1;
+                var width = 1000;
+                var height = 320;
+                var paddingX = 36;
+                var paddingTop = 26;
+                var paddingBottom = 54;
+                var innerWidth = width - paddingX * 2;
+                var innerHeight = height - paddingTop - paddingBottom;
+                var stepX = points.length > 1 ? innerWidth / (points.length - 1) : innerWidth / 2;
+
+                var coords = points.map(function (count, idx) {
+                    var x = paddingX + (points.length > 1 ? idx * stepX : innerWidth / 2);
+                    var y = paddingTop + innerHeight - (count / maxVal) * innerHeight;
+                    return { x: x, y: y, count: count };
                 });
-                html += '</div>';
-                container.innerHTML = html;
+
+                var linePath = buildSmoothPath(coords);
+                var areaPath = buildAreaPath(coords, paddingTop + innerHeight);
+
+                var labels = dailyVisitors.map(function (day) {
+                    return '<span>' + day.date.split('-').slice(1).join('/') + '</span>';
+                }).join('');
+
+                var pointsSvg = coords.map(function (pt) {
+                    return '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="5" fill="var(--color-primary)" stroke="#fff" stroke-width="3"></circle>';
+                }).join('');
+
+                var gridLines = [0.25, 0.5, 0.75].map(function (ratio) {
+                    var y = paddingTop + innerHeight - (innerHeight * ratio);
+                    return '<div class="daily-line-gridline" style="top:' + y + 'px;"></div>';
+                }).join('');
+
+                return '<div class="daily-line-wrap">' +
+                    '<svg class="daily-line-svg" viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" aria-label="Daily visitors line chart">' +
+                        '<defs>' +
+                            '<linearGradient id="dailyVisitorsArea" x1="0" y1="0" x2="0" y2="1">' +
+                                '<stop offset="0%" stop-color="rgba(44, 122, 123, 0.35)"></stop>' +
+                                '<stop offset="100%" stop-color="rgba(44, 122, 123, 0.02)"></stop>' +
+                            '</linearGradient>' +
+                        '</defs>' +
+                        '<path d="' + areaPath + '" fill="url(#dailyVisitorsArea)"></path>' +
+                        '<path d="' + linePath + '" fill="none" stroke="var(--color-primary)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>' +
+                        pointsSvg +
+                    '</svg>' +
+                    '<div class="daily-line-axes">' + gridLines + '</div>' +
+                    '<div class="daily-line-labels">' + labels + '</div>' +
+                '</div>';
+            }
+
+            function buildSmoothPath(coords) {
+                if (coords.length === 1) {
+                    return 'M ' + coords[0].x + ' ' + coords[0].y;
+                }
+
+                var path = 'M ' + coords[0].x + ' ' + coords[0].y;
+                for (var i = 0; i < coords.length - 1; i++) {
+                    var p0 = coords[i - 1] || coords[i];
+                    var p1 = coords[i];
+                    var p2 = coords[i + 1];
+                    var p3 = coords[i + 2] || p2;
+
+                    var c1x = p1.x + (p2.x - p0.x) / 6;
+                    var c1y = p1.y + (p2.y - p0.y) / 6;
+                    var c2x = p2.x - (p3.x - p1.x) / 6;
+                    var c2y = p2.y - (p3.y - p1.y) / 6;
+
+                    path += ' C ' + c1x + ' ' + c1y + ', ' + c2x + ' ' + c2y + ', ' + p2.x + ' ' + p2.y;
+                }
+                return path;
+            }
+
+            function buildAreaPath(coords, baseY) {
+                if (!coords.length) return '';
+                var linePath = buildSmoothPath(coords);
+                var first = coords[0];
+                var last = coords[coords.length - 1];
+                return 'M ' + first.x + ' ' + baseY + ' ' + linePath.slice(2) + ' L ' + last.x + ' ' + baseY + ' Z';
             }
 
             function loadDeviceBrowserStats() {
                 window.CloudyBreezeAdmin.apiGet('/api/analytics/admin/visitors?period=' + getPeriod())
                     .then(function (result) {
                         if (!result.success) return;
-                        var data = result.data;
+                        var data = result.data || {};
                         renderStatList('browserStats', data.browserStats || {});
                         renderStatList('osStats', data.osStats || {});
                     })
@@ -336,11 +635,13 @@
                 var el = document.getElementById('adminUserName');
                 if (el && user) el.textContent = user.fullName || user.email;
             }
+
             function initSidebar() {
                 var toggle = document.getElementById('sidebarToggle');
                 var sidebar = document.getElementById('adminSidebar');
                 if (toggle && sidebar) toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); });
             }
+
             function initLogout() {
                 var btn = document.getElementById('logoutBtn');
                 if (btn) btn.addEventListener('click', function () { window.CloudyBreezeAdmin.logout(); });
