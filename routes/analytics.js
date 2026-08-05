@@ -22,6 +22,10 @@ const { authenticate } = require('../middleware/auth');
 // Record a page view (fire-and-forget, always returns 200)
 router.post('/pageview', analyticsController.recordPageView);
 
+// POST /api/analytics/product-view
+// Record a product detail view
+router.post('/product-view', analyticsController.recordProductView);
+
 // GET /api/analytics/products/top
 // Get most viewed products
 router.get('/products/top', productController.getMostViewedProducts);
