@@ -95,6 +95,41 @@
     }
 
     // ============================================================
+    // Sidebar Enhancements
+    // ============================================================
+
+    function injectAdminNavItem() {
+        var navLists = document.querySelectorAll('.admin-nav-list');
+
+        navLists.forEach(function (navList) {
+            if (!navList || navList.querySelector('[data-admin-nav="messages"]')) {
+                return;
+            }
+
+            var settingsLink = navList.querySelector('a[href="/admin/settings.html"]');
+            var messagesItem = document.createElement('li');
+            messagesItem.setAttribute('data-admin-nav', 'messages');
+            messagesItem.innerHTML =
+                '<a href="/admin/messages.html" class="admin-nav-link">' +
+                    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' +
+                    'Messages' +
+                '</a>';
+
+            if (settingsLink && settingsLink.parentElement) {
+                navList.insertBefore(messagesItem, settingsLink.parentElement);
+            } else {
+                navList.appendChild(messagesItem);
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectAdminNavItem);
+    } else {
+        injectAdminNavItem();
+    }
+
+    // ============================================================
     // API Helpers
     // ============================================================
 
