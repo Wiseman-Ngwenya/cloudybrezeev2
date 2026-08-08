@@ -61,11 +61,12 @@ async function getNextOrderNumber() {
  * Flow:
  * 1. Validate items array
  * 2. Fetch current product/variant prices from database
- * 3. Calculate subtotal, shipping, total
- * 4. Generate order number
- * 5. Insert order record
- * 6. Insert order items
- * 7. Return complete order
+ * 3. Validate shipping country server-side
+ * 4. Calculate subtotal, shipping, total
+ * 5. Generate order number
+ * 6. Insert order record
+ * 7. Insert order items
+ * 8. Return complete order
  *
  * @param {Object} orderData - Order data from checkout
  * @returns {Promise<Object>} Created order with items
@@ -80,6 +81,7 @@ async function createOrder(orderData) {
         shipping_address,
         shipping_city,
         shipping_country,
+        shipping_country_code,
         payment_method,
         notes,
         items,
@@ -88,6 +90,51 @@ async function createOrder(orderData) {
     // Validate items
     if (!items || !Array.isArray(items) || items.length === 0) {
         throw new BadRequestError('Order must contain at least one item.');
+    }
+
+    // Validate shipping country against server-side table
+    const normalizedCountryCode = String(shipping_country_code || '').trim().toUpperCase();
+    const normalizedCountryName = String(shipping_country || '').trim();
+    let shippingCountryRecord = null;
+
+    if (normalizedCountryCode) {
+        const { data: countryByCode, error: countryCodeError } = await serviceClient
+            .from('shipping_countries')
+            .select('country_code, country_name, shipping_cost, estimated_days_min, estimated_days_max, active')
+            .eq('country_code', normalizedCountryCode)
+            .maybeSingle();
+
+        if (countryCodeError) {
+            console.error('Error validating shipping country:', countryCodeError);
+            throw countryCodeError;
+        }
+
+        shippingCountryRecord = countryByCode || null;
+    }
+
+    if (!shippingCountryRecord && normalizedCountryName) {
+        const { data: countryByName, error: countryNameError } = await serviceClient
+            .from('shipping_countries')
+            .select('country_code, country_name, shipping_cost, estimated_days_min, estimated_days_max, active')
+            .eq('country_name', normalizedCountryName)
+            .maybeSingle();
+
+        if (countryNameError) {
+            console.error('Error validating shipping country:', countryNameError);
+            throw countryNameError;
+        }
+
+        shippingCountryRecord = countryByName || null;
+    }
+
+    if (!shippingCountryRecord) {
+        throw new BadRequestError('Selected shipping country is not available.');
+    }
+
+    if (!shippingCountryRecord.active) {
+        throw new BadRequestError(
+            `Shipping to "${shippingCountryRecord.country_name}" is currently unavailable.`
+        );
     }
 
     // Fetch current product prices and build order items
@@ -159,26 +206,26 @@ async function createOrder(orderData) {
     // Round subtotal to 2 decimal places
     subtotal = parseFloat(subtotal.toFixed(2));
 
-    // Calculate shipping cost
-    let shippingCost = SHIPPING.DEFAULT_COST;
+    // Calculate shipping cost from the selected shipping country (server-side trusted value)
+    let shippingCost = parseFloat(shippingCountryRecord.shipping_cost || SHIPPING.DEFAULT_COST);
 
     // Check for free shipping threshold from store settings
-    const { data: settings } = await serviceClient
+    const { data: settings, error: settingsError } = await serviceClient
         .from('store_settings')
-        .select('shipping_cost, free_shipping_threshold')
+        .select('free_shipping_threshold')
         .limit(1)
         .single();
 
-    if (settings) {
-        shippingCost = parseFloat(settings.shipping_cost || SHIPPING.DEFAULT_COST);
+    if (settingsError) {
+        console.error('Error fetching store settings:', settingsError);
+    }
 
-        // Apply free shipping if threshold is met
-        if (
-            settings.free_shipping_threshold &&
-            subtotal >= parseFloat(settings.free_shipping_threshold)
-        ) {
-            shippingCost = 0;
-        }
+    if (
+        settings &&
+        settings.free_shipping_threshold &&
+        subtotal >= parseFloat(settings.free_shipping_threshold)
+    ) {
+        shippingCost = 0;
     }
 
     // Calculate total
@@ -203,7 +250,7 @@ async function createOrder(orderData) {
             customer_phone: customer_phone || null,
             shipping_address,
             shipping_city,
-            shipping_country,
+            shipping_country: shippingCountryRecord.country_name,
             notes: notes || null,
         })
         .select()
