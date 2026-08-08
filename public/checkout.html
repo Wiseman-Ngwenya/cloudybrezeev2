@@ -20,9 +20,7 @@
             </a>
             <nav class="main-nav" id="mainNav">
                 <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span></span><span></span><span></span>
                 </button>
                 <ul class="nav-list" id="navList">
                     <li><a href="/" class="nav-link">Home</a></li>
@@ -35,8 +33,7 @@
             <div class="header-actions">
                 <a href="/checkout" class="cart-link active" id="cartLink" aria-label="View cart">
                     <svg class="cart-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
+                        <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                     </svg>
                     <span class="cart-count" id="cartCount">0</span>
@@ -45,17 +42,13 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
         <section class="checkout-section">
             <div class="container">
-
-                <!-- Empty Cart State -->
                 <div class="checkout-empty" id="checkoutEmpty" style="display: none;">
                     <div class="empty-cart-content">
                         <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <circle cx="9" cy="21" r="1"></circle>
-                            <circle cx="20" cy="21" r="1"></circle>
+                            <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
                             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                         </svg>
                         <h2>Your Cart is Empty</h2>
@@ -64,41 +57,24 @@
                     </div>
                 </div>
 
-                <!-- Checkout Content -->
                 <div class="checkout-content" id="checkoutContent" style="display: none;">
                     <h1 class="checkout-title">Checkout</h1>
 
                     <div class="checkout-layout">
-                        <!-- Order Summary -->
                         <div class="checkout-summary">
                             <h2 class="summary-title">Order Summary</h2>
-                            <div class="cart-items" id="cartItems">
-                                <!-- Cart items rendered dynamically -->
-                            </div>
+                            <div class="cart-items" id="cartItems"></div>
                             <div class="summary-totals">
-                                <div class="summary-row">
-                                    <span>Subtotal</span>
-                                    <span id="summarySubtotal">$0.00</span>
-                                </div>
-                                <div class="summary-row">
-                                    <span>Shipping</span>
-                                    <span id="summaryShipping">$0.00</span>
-                                </div>
-                                <div class="summary-row summary-free-shipping" id="freeShippingNote" style="display: none;">
-                                    <span>Free Shipping Applied!</span>
-                                </div>
-                                <div class="summary-row summary-total">
-                                    <span>Total</span>
-                                    <span id="summaryTotal">$0.00</span>
-                                </div>
+                                <div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">$0.00</span></div>
+                                <div class="summary-row"><span>Shipping</span><span id="summaryShipping">$0.00</span></div>
+                                <div class="summary-row summary-free-shipping" id="freeShippingNote" style="display: none;"><span>Free Shipping Applied!</span></div>
+                                <div class="summary-row summary-total"><span>Total</span><span id="summaryTotal">$0.00</span></div>
                             </div>
                         </div>
 
-                        <!-- Checkout Form -->
                         <div class="checkout-form-container">
                             <h2 class="form-title">Shipping & Payment</h2>
                             <form class="checkout-form" id="checkoutForm" novalidate>
-                                <!-- Customer Information -->
                                 <fieldset class="form-fieldset">
                                     <legend class="form-legend">Customer Information</legend>
                                     <div class="form-row">
@@ -119,7 +95,6 @@
                                     </div>
                                 </fieldset>
 
-                                <!-- Shipping Information -->
                                 <fieldset class="form-fieldset">
                                     <legend class="form-legend">Shipping Address</legend>
                                     <div class="form-row">
@@ -135,33 +110,28 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="shippingCountry" class="form-label">Country *</label>
-                                            <input type="text" id="shippingCountry" name="shipping_country" class="form-input" required placeholder="United States">
+                                            <select id="shippingCountry" name="shipping_country" class="form-input" required disabled>
+                                                <option value="">Loading available countries...</option>
+                                            </select>
+                                            <small id="shippingCountryMessage" style="display:block;margin-top:6px;opacity:.75;"></small>
                                         </div>
                                     </div>
                                 </fieldset>
 
-                                <!-- Payment Method -->
                                 <fieldset class="form-fieldset">
                                     <legend class="form-legend">Payment Method</legend>
                                     <div class="payment-options">
                                         <label class="payment-option">
                                             <input type="radio" name="payment_method" value="bank_transfer" checked>
-                                            <div class="payment-option-content">
-                                                <span class="payment-option-title">Bank Transfer</span>
-                                                <span class="payment-option-desc">Pay via bank transfer. Order will be processed after payment confirmation.</span>
-                                            </div>
+                                            <div class="payment-option-content"><span class="payment-option-title">Bank Transfer</span><span class="payment-option-desc">Pay via bank transfer. Order will be processed after payment confirmation.</span></div>
                                         </label>
                                         <label class="payment-option">
                                             <input type="radio" name="payment_method" value="paypal">
-                                            <div class="payment-option-content">
-                                                <span class="payment-option-title">PayPal</span>
-                                                <span class="payment-option-desc">Pay securely via PayPal. You will be redirected to complete payment.</span>
-                                            </div>
+                                            <div class="payment-option-content"><span class="payment-option-title">PayPal</span><span class="payment-option-desc">Pay securely via PayPal. You will be redirected to complete payment.</span></div>
                                         </label>
                                     </div>
                                 </fieldset>
 
-                                <!-- Order Notes -->
                                 <fieldset class="form-fieldset">
                                     <legend class="form-legend">Additional Notes</legend>
                                     <div class="form-row">
@@ -172,102 +142,44 @@
                                     </div>
                                 </fieldset>
 
-                                <!-- Form Messages -->
                                 <div class="form-message error" id="checkoutMessage" style="display: none;"></div>
-
-                                <!-- Submit -->
-                                <button type="submit" class="btn btn-primary btn-lg btn-full" id="placeOrderBtn">
-                                    Place Order
-                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg btn-full" id="placeOrderBtn">Place Order</button>
                             </form>
                         </div>
                     </div>
 
-                    <!-- Order Success -->
                     <div class="checkout-success" id="checkoutSuccess" style="display: none;">
                         <div class="success-content">
                             <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
                             </svg>
                             <h2>Order Placed Successfully!</h2>
                             <p class="success-order-number">Your order number is: <strong id="successOrderNumber"></strong></p>
                             <p>We have sent a confirmation to your email. You can track your order using the order number above.</p>
-                            <div class="success-actions">
-                                <a href="/tracking" class="btn btn-primary">Track Your Order</a>
-                                <a href="/products" class="btn btn-outline">Continue Shopping</a>
-                            </div>
+                            <div class="success-actions"><a href="/tracking" class="btn btn-primary">Track Your Order</a><a href="/products" class="btn btn-outline">Continue Shopping</a></div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="site-footer">
         <div class="container">
             <div class="footer-grid">
-                <div class="footer-brand">
-                    <img src="images/logo.png" alt="CloudyBreeze Logo" class="footer-logo">
-                    <p class="footer-tagline">
-                        Premium humidifiers and aroma diffusers for a healthier, more comfortable home.
-                    </p>
-                    <div class="footer-social" id="footerSocial"></div>
-                </div>
-                <div class="footer-links">
-                    <h4 class="footer-heading">Quick Links</h4>
-                    <ul>
-                        <li><a href="/products">All Products</a></li>
-                        <li><a href="/about">About Us</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                        <li><a href="/tracking">Track Order</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4 class="footer-heading">Customer Service</h4>
-                    <ul>
-                        <li><a href="/shipping">Shipping Policy</a></li>
-                        <li><a href="/refund">Refund Policy</a></li>
-                        <li><a href="/privacy">Privacy Policy</a></li>
-                        <li><a href="/terms">Terms of Service</a></li>
-                        <li><a href="/faq">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-contact">
-                    <h4 class="footer-heading">Contact Us</h4>
-                    <ul>
-                        <li class="footer-contact-item">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            <span id="footerEmail">hello@cloudybreeze.com</span>
-                        </li>
-                        <li class="footer-contact-item" id="footerPhoneWrapper">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                            </svg>
-                            <span id="footerPhone"></span>
-                        </li>
-                        <li class="footer-contact-item" id="footerAddressWrapper">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-                            <span id="footerAddress"></span>
-                        </li>
-                    </ul>
-                </div>
+                <div class="footer-brand"><img src="images/logo.png" alt="CloudyBreeze Logo" class="footer-logo"><p class="footer-tagline">Premium humidifiers and aroma diffusers for a healthier, more comfortable home.</p><div class="footer-social" id="footerSocial"></div></div>
+                <div class="footer-links"><h4 class="footer-heading">Quick Links</h4><ul><li><a href="/products">All Products</a></li><li><a href="/about">About Us</a></li><li><a href="/contact">Contact</a></li><li><a href="/tracking">Track Order</a></li></ul></div>
+                <div class="footer-links"><h4 class="footer-heading">Customer Service</h4><ul><li><a href="/shipping">Shipping Policy</a></li><li><a href="/refund">Refund Policy</a></li><li><a href="/privacy">Privacy Policy</a></li><li><a href="/terms">Terms of Service</a></li><li><a href="/faq">FAQ</a></li></ul></div>
+                <div class="footer-contact"><h4 class="footer-heading">Contact Us</h4><ul>
+                    <li class="footer-contact-item"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg><span id="footerEmail">hello@cloudybreeze.com</span></li>
+                    <li class="footer-contact-item" id="footerPhoneWrapper"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span id="footerPhone"></span></li>
+                    <li class="footer-contact-item" id="footerAddressWrapper"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><span id="footerAddress"></span></li>
+                </ul></div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; <span id="currentYear"></span> CloudyBreeze. All rights reserved.</p>
-            </div>
+            <div class="footer-bottom"><p>&copy; <span id="currentYear"></span> CloudyBreeze. All rights reserved.</p></div>
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="js/analytics.js"></script>
     <script src="js/site.js"></script>
     <script src="js/cart.js"></script>
