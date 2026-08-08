@@ -2,10 +2,6 @@
 // CloudyBreeze E-Commerce System
 // Settings Routes
 // ============================================================
-// Defines routes for store settings operations.
-// Public routes mounted at /api/settings
-// Admin routes mounted at /api/admin/settings
-// ============================================================
 
 const express = require('express');
 const router = express.Router();
@@ -17,27 +13,15 @@ const {
     handleValidationResult,
 } = require('../middleware/validate');
 
-// ============================================================
-// Public Routes
-// ============================================================
-
-// GET /api/settings
-// Get store settings for public display
+// Public settings
 router.get('/', settingsController.getPublicSettings);
+router.get('/shipping-countries', settingsController.getPublicShippingCountries);
 
-// ============================================================
-// Admin Routes
-// ============================================================
-
-// All admin routes require authentication
+// Admin routes
 router.use('/admin', authenticate);
 
-// GET /api/admin/settings
-// Get all store settings for admin management
 router.get('/admin', settingsController.getSettings);
 
-// PUT /api/admin/settings
-// Update store settings
 router.put(
     '/admin',
     settingsValidationRules,
@@ -45,7 +29,10 @@ router.put(
     settingsController.updateSettings
 );
 
-// ============================================================
-// Export
-// ============================================================
+// Shipping countries - admin CRUD
+router.get('/admin/settings/shipping-countries', settingsController.getShippingCountries);
+router.post('/admin/settings/shipping-countries', settingsController.createShippingCountry);
+router.patch('/admin/settings/shipping-countries/:id', settingsController.updateShippingCountry);
+router.delete('/admin/settings/shipping-countries/:id', settingsController.deleteShippingCountry);
+
 module.exports = router;
