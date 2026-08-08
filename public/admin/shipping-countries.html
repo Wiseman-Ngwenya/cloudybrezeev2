@@ -156,7 +156,7 @@
       var filteredCountries = [];
 
       function el(id) { return document.getElementById(id); }
-      function escapeHtml(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+      function escapeHtml(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
 
       function setMessage(text, type) {
         var box = el('countryFormMessage');
@@ -247,7 +247,7 @@
           btn.addEventListener('click', function () {
             var id = btn.getAttribute('data-delete');
             if (!confirm('Delete this shipping country?')) return;
-            window.CloudyBreezeAdmin.apiDelete('/api/admin/settings/shipping-countries/' + id)
+            window.CloudyBreezeAdmin.apiDelete('/api/settings/admin/shipping-countries/' + id)
               .then(function (res) { if (!res || !res.success) throw new Error('Delete failed'); loadCountries(); })
               .catch(function (err) { console.error(err); setMessage('Could not delete the country.', 'error'); });
           });
@@ -255,7 +255,7 @@
       }
 
       function loadCountries() {
-        window.CloudyBreezeAdmin.apiGet('/api/admin/settings/shipping-countries')
+        window.CloudyBreezeAdmin.apiGet('/api/settings/admin/shipping-countries')
           .then(function (res) {
             if (!res || !res.success) throw new Error('Failed to load countries');
             allCountries = Array.isArray(res.data) ? res.data : (res.data.countries || []);
@@ -271,8 +271,8 @@
       function saveCountry(payload, silent) {
         var id = payload.id;
         var apiPromise = id
-          ? window.CloudyBreezeAdmin.apiPatch('/api/admin/settings/shipping-countries/' + id, payload)
-          : window.CloudyBreezeAdmin.apiPost('/api/admin/settings/shipping-countries', payload);
+          ? window.CloudyBreezeAdmin.apiPatch('/api/settings/admin/shipping-countries/' + id, payload)
+          : window.CloudyBreezeAdmin.apiPost('/api/settings/admin/shipping-countries', payload);
 
         return apiPromise
           .then(function (res) {
