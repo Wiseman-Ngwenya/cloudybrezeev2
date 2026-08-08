@@ -13,11 +13,11 @@ const {
     handleValidationResult,
 } = require('../middleware/validate');
 
-// Public settings
+// Public routes - mounted at /api/settings
 router.get('/', settingsController.getPublicSettings);
 router.get('/shipping-countries', settingsController.getPublicShippingCountries);
 
-// Admin routes
+// Admin routes - mounted at /api/settings/admin/*
 router.use('/admin', authenticate);
 
 router.get('/admin', settingsController.getSettings);
@@ -29,10 +29,9 @@ router.put(
     settingsController.updateSettings
 );
 
-// Shipping countries - admin CRUD
-router.get('/admin/settings/shipping-countries', settingsController.getShippingCountries);
-router.post('/admin/settings/shipping-countries', settingsController.createShippingCountry);
-router.patch('/admin/settings/shipping-countries/:id', settingsController.updateShippingCountry);
-router.delete('/admin/settings/shipping-countries/:id', settingsController.deleteShippingCountry);
+router.get('/admin/shipping-countries', settingsController.getShippingCountries);
+router.post('/admin/shipping-countries', settingsController.createShippingCountry);
+router.patch('/admin/shipping-countries/:id', settingsController.updateShippingCountry);
+router.delete('/admin/shipping-countries/:id', settingsController.deleteShippingCountry);
 
 module.exports = router;
