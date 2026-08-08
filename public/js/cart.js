@@ -18,6 +18,7 @@
     // ============================================================
     var shippingCost = 0;
     var freeShippingThreshold = null;
+    var shippingCostOverride = null;
 
     // ============================================================
     // DOM Elements
@@ -74,6 +75,22 @@
                         : null;
                 }
             });
+    }
+
+    /**
+     * Set or clear a shipping cost override selected by the customer.
+     *
+     * @param {number|null} value - Shipping cost override or null to reset
+     */
+    function setShippingCost(value) {
+        if (value === null || value === undefined || value === '') {
+            shippingCostOverride = null;
+        } else {
+            var parsed = parseFloat(value);
+            shippingCostOverride = isNaN(parsed) ? null : parsed;
+        }
+
+        refreshCartDisplay();
     }
 
     // ============================================================
@@ -219,7 +236,7 @@
         }, 0);
 
         // Determine shipping cost
-        var effectiveShippingCost = shippingCost;
+        var effectiveShippingCost = shippingCostOverride !== null ? shippingCostOverride : shippingCost;
 
         // Check free shipping threshold
         if (freeShippingThreshold !== null && subtotal >= freeShippingThreshold) {
@@ -284,6 +301,7 @@
     window.CloudyBreeze.initCart = initCart;
     window.CloudyBreeze.getCartTotals = getCartTotals;
     window.CloudyBreeze.refreshCartDisplay = refreshCartDisplay;
+    window.CloudyBreeze.setShippingCost = setShippingCost;
 
     // ============================================================
     // Initialization
