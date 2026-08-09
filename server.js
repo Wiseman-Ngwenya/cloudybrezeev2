@@ -4,6 +4,7 @@
 // ============================================================
 
 require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -12,6 +13,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
+
 const errorHandler = require('./middleware/errorHandler');
 
 const envFiles = ['.env.example', '.env', '.env.local'];
@@ -36,23 +38,31 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
-            defaultSrc: ["'self'"], scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https://*.supabase.co'],
-            connectSrc: ["'self'", 'https://*.supabase.co'], fontSrc: ["'self'"],
-            objectSrc: ["'none'"], mediaSrc: ["'self'"], frameSrc: ["'none'"],
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", 'data:', 'https://*.supabase.co'],
+            connectSrc: ["'self'", 'https://*.supabase.co'],
+            fontSrc: ["'self'"], objectSrc: ["'none'"], mediaSrc: ["'self'"], frameSrc: ["'none'"],
         },
-    }, crossOriginEmbedderPolicy: false,
+    },
+    crossOriginEmbedderPolicy: false,
 }));
+
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' ? process.env.ALLOWED_ORIGIN || '*' : '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'], credentials: true,
 }));
 
-const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false,
-    message: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.' } } });
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false,
-    message: { success: false, error: { code: 'AUTH_RATE_LIMIT_EXCEEDED', message: 'Too many authentication attempts. Please try again later.' } } });
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false,
+    message: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.' } },
+});
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false,
+    message: { success: false, error: { code: 'AUTH_RATE_LIMIT_EXCEEDED', message: 'Too many authentication attempts. Please try again later.' } },
+});
 app.use('/api/', globalLimiter);
 app.use('/api/admin/auth', authLimiter);
 
@@ -60,7 +70,8 @@ if (process.env.NODE_ENV !== 'production') app.use(morgan('dev')); else app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'cloudybreeze-default-secret', resave: false, saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'cloudybreeze-default-secret',
+    resave: false, saveUninitialized: false,
     cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: 'lax' },
 }));
 
@@ -90,8 +101,7 @@ app.get('/refund', (req, res) => res.sendFile(path.join(__dirname, 'public', 're
 app.get('/shipping', (req, res) => res.sendFile(path.join(__dirname, 'public', 'shipping.html')));
 app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
 
-// MojaPOS returns the customer's browser here after hosted checkout.
-// This is only a customer-facing return; payment confirmation will be handled by webhook in the next step.
+// MojaPOS customer return URL. This does not confirm payment; webhook handling will do that.
 app.get('/payment/return', (req, res) => {
     const transactionId = req.query.transactionId;
     const query = transactionId ? `?payment=return&transactionId=${encodeURIComponent(transactionId)}` : '?payment=return';
