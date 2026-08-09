@@ -16,10 +16,12 @@ const session = require('express-session');
 
 const errorHandler = require('./middleware/errorHandler');
 
-const envFiles = ['.env.example', '.env', '.env.local'];
+// Only load real local environment files. .env.example is documentation,
+// not a runtime configuration file and must never override real credentials.
+const envFiles = ['.env.local', '.env'];
 for (const envFile of envFiles) {
     const envPath = path.join(__dirname, envFile);
-    if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath, override: true });
+    if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath, override: false });
 }
 
 const productRoutes = require('./routes/products');
@@ -38,17 +40,13 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", 'data:', 'https://*.supabase.co'],
-            connectSrc: ["'self'", 'https://*.supabase.co'],
-            fontSrc: ["'self'"], objectSrc: ["'none'"], mediaSrc: ["'self'"], frameSrc: ["'none'"],
+            defaultSrc: ["'self'"], scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https://*.supabase.co'],
+            connectSrc: ["'self'", 'https://*.supabase.co'], fontSrc: ["'self'"],
+            objectSrc: ["'none'"], mediaSrc: ["'self'"], frameSrc: ["'none'"],
         },
-    },
-    crossOriginEmbedderPolicy: false,
+    }, crossOriginEmbedderPolicy: false,
 }));
-
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' ? process.env.ALLOWED_ORIGIN || '*' : '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -70,8 +68,7 @@ if (process.env.NODE_ENV !== 'production') app.use(morgan('dev')); else app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'cloudybreeze-default-secret',
-    resave: false, saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'cloudybreeze-default-secret', resave: false, saveUninitialized: false,
     cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: 'lax' },
 }));
 
@@ -101,7 +98,6 @@ app.get('/refund', (req, res) => res.sendFile(path.join(__dirname, 'public', 're
 app.get('/shipping', (req, res) => res.sendFile(path.join(__dirname, 'public', 'shipping.html')));
 app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
 
-// MojaPOS customer return URL. This does not confirm payment; webhook handling will do that.
 app.get('/payment/return', (req, res) => {
     const transactionId = req.query.transactionId;
     const query = transactionId ? `?payment=return&transactionId=${encodeURIComponent(transactionId)}` : '?payment=return';
