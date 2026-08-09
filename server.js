@@ -27,6 +27,7 @@ for (const envFile of envFiles) {
 const productRoutes = require('./routes/products');
 const categoryRoutes = require('./routes/categories');
 const orderRoutes = require('./routes/orders');
+const paymentRoutes = require('./routes/payments');
 const authRoutes = require('./routes/auth');
 const analyticsRoutes = require('./routes/analytics');
 const contactRoutes = require('./routes/contact');
@@ -78,6 +79,7 @@ app.use('/admin', express.static(path.join(__dirname, 'public', 'admin'), { inde
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
