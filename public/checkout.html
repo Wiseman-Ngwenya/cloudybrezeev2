@@ -73,7 +73,7 @@
                         </div>
 
                         <div class="checkout-form-container">
-                            <h2 class="form-title">Shipping & Payment</h2>
+                            <h2 class="form-title">Checkout Details</h2>
                             <form class="checkout-form" id="checkoutForm" novalidate>
                                 <fieldset class="form-fieldset">
                                     <legend class="form-legend">Customer Information</legend>
@@ -118,17 +118,12 @@
                                     </div>
                                 </fieldset>
 
-                                <fieldset class="form-fieldset">
-                                    <legend class="form-legend">Payment Method</legend>
+                                <fieldset class="form-fieldset" id="paymentSection" style="display: none;">
+                                    <legend class="form-legend">Payment</legend>
                                     <div class="payment-options">
-                                        <label class="payment-option">
-                                            <input type="radio" name="payment_method" value="bank_transfer" checked>
-                                            <div class="payment-option-content"><span class="payment-option-title">Bank Transfer</span><span class="payment-option-desc">Pay via bank transfer. Order will be processed after payment confirmation.</span></div>
-                                        </label>
-                                        <label class="payment-option">
-                                            <input type="radio" name="payment_method" value="paypal">
-                                            <div class="payment-option-content"><span class="payment-option-title">PayPal</span><span class="payment-option-desc">Pay securely via PayPal. You will be redirected to complete payment.</span></div>
-                                        </label>
+                                        <div class="payment-option">
+                                            <div class="payment-option-content"><span class="payment-option-title">Payment currently unavailable</span><span class="payment-option-desc">We are currently setting up payment processing for your region. No payment will be taken and no order will be placed.</span></div>
+                                        </div>
                                     </div>
                                 </fieldset>
 
@@ -143,20 +138,8 @@
                                 </fieldset>
 
                                 <div class="form-message error" id="checkoutMessage" style="display: none;"></div>
-                                <button type="submit" class="btn btn-primary btn-lg btn-full" id="placeOrderBtn">Place Order</button>
+                                <button type="submit" class="btn btn-primary btn-lg btn-full" id="placeOrderBtn">Proceed to Payment</button>
                             </form>
-                        </div>
-                    </div>
-
-                    <div class="checkout-success" id="checkoutSuccess" style="display: none;">
-                        <div class="success-content">
-                            <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                            <h2>Order Placed Successfully!</h2>
-                            <p class="success-order-number">Your order number is: <strong id="successOrderNumber"></strong></p>
-                            <p>We have sent a confirmation to your email. You can track your order using the order number above.</p>
-                            <div class="success-actions"><a href="/tracking" class="btn btn-primary">Track Your Order</a><a href="/products" class="btn btn-outline">Continue Shopping</a></div>
                         </div>
                     </div>
                 </div>
@@ -172,7 +155,7 @@
                 <div class="footer-links"><h4 class="footer-heading">Customer Service</h4><ul><li><a href="/shipping">Shipping Policy</a></li><li><a href="/refund">Refund Policy</a></li><li><a href="/privacy">Privacy Policy</a></li><li><a href="/terms">Terms of Service</a></li><li><a href="/faq">FAQ</a></li></ul></div>
                 <div class="footer-contact"><h4 class="footer-heading">Contact Us</h4><ul>
                     <li class="footer-contact-item"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg><span id="footerEmail">hello@cloudybreeze.com</span></li>
-                    <li class="footer-contact-item" id="footerPhoneWrapper"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span id="footerPhone"></span></li>
+                    <li class="footer-contact-item" id="footerPhoneWrapper"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 1 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span id="footerPhone"></span></li>
                     <li class="footer-contact-item" id="footerAddressWrapper"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><span id="footerAddress"></span></li>
                 </ul></div>
             </div>
