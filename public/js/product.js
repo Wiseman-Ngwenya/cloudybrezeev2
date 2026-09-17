@@ -109,6 +109,84 @@
         return 'desktop';
     }
 
+    // ============================================================
+    // Interest-test experiment tracking
+    // ============================================================
+
+    function ensureExperimentTracker() {
+        try {
+            if (window.CloudyBreezeExperiment) return;
+            if (document.querySelector('script[data-cloudybreeze-experiment="true"]')) return;
+
+            var script = document.createElement('script');
+            script.src = '/js/experiment-tracker.js';
+            script.async = true;
+            script.dataset.cloudybreezeExperiment = 'true';
+            script.onerror = function () {
+                // Experiment tracking is optional and must never break the store.
+            };
+            document.head.appendChild(script);
+        } catch (err) {
+            // Silently ignore tracker loading failures.
+        }
+    }
+
+    function trackExperimentEvent(eventType, metadata) {
+        if (!product || !product.id) return;
+
+        function attempt(attemptNumber) {
+            var tracker = window.CloudyBreezeExperiment;
+
+            if (tracker && typeof tracker.track === 'function') {
+                try {
+                    tracker.track(eventType, {
+                        product_id: String(product.id),
+                        page_path: window.location.pathname,
+                        metadata: metadata || {}
+                    });
+                } catch (err) {
+                    // Experiment tracking must never interrupt a customer action.
+                }
+                return;
+            }
+
+            if (attemptNumber < 30) {
+                window.setTimeout(function () {
+                    attempt(attemptNumber + 1);
+                }, 100);
+            }
+        }
+
+        attempt(0);
+    }
+
+    function getCurrentUnitPrice() {
+        if (!product) return 0;
+
+        var price = parseFloat(product.price) || 0;
+        if (selectedVariant) {
+            price += parseFloat(selectedVariant.price_adjustment || 0);
+        }
+        return price;
+    }
+
+    function getInteractionTrackingData() {
+        var unitPrice = getCurrentUnitPrice();
+        var data = {
+            quantity: quantity,
+            unit_price: Number(unitPrice.toFixed(2)),
+            total_price: Number((unitPrice * quantity).toFixed(2)),
+            source: 'product_detail'
+        };
+
+        if (selectedVariant) {
+            data.variant_id = selectedVariant.id || null;
+            data.variant_name = selectedVariant.variation_name || null;
+        }
+
+        return data;
+    }
+
     function trackProductViewOnce() {
         if (productViewTracked || !product || !product.id) return;
         productViewTracked = true;
@@ -132,6 +210,12 @@
             keepalive: true,
         }).catch(function (err) {
             console.error('Failed to record product view:', err);
+        });
+
+        trackExperimentEvent('product_view', {
+            view_source: 'product_detail',
+            product_slug: getSlugFromUrl(),
+            price: Number((parseFloat(product.price) || 0).toFixed(2))
         });
     }
 
@@ -258,6 +342,11 @@
         function showImageAt(index) {
             if (!allImages[index] || !galleryMainImage) return;
 
+            trackExperimentEvent('product_image_view', {
+                image_index: index + 1,
+                image_count: allImages.length
+            });
+
             galleryMainImage.style.opacity = '0.25';
             window.setTimeout(function () {
                 galleryMainImage.src = allImages[index].url;
@@ -345,11 +434,7 @@
     }
 
     function updateAddToCartPrice() {
-        var price = parseFloat(product.price) || 0;
-        if (selectedVariant) {
-            price += parseFloat(selectedVariant.price_adjustment || 0);
-        }
-        if (addToCartPrice) addToCartPrice.textContent = '$' + (price * quantity).toFixed(2);
+        if (addToCartPrice) addToCartPrice.textContent = '$' + (getCurrentUnitPrice() * quantity).toFixed(2);
     }
 
     function renderMeta() {
@@ -484,6 +569,8 @@
             if (!product) return;
             if (!addCurrentProductToCart()) return;
 
+            trackExperimentEvent('add_to_cart', getInteractionTrackingData());
+
             if (cartMessage) {
                 cartMessage.textContent = 'Added to cart!';
                 cartMessage.className = 'cart-message success';
@@ -499,6 +586,8 @@
 
         buyNowBtn.addEventListener('click', function () {
             if (!product || isBuyingNow) return;
+
+            trackExperimentEvent('buy_now_click', getInteractionTrackingData());
 
             isBuyingNow = true;
             setActionButtonsDisabled(true);
@@ -542,6 +631,7 @@
     }
 
     function init() {
+        ensureExperimentTracker();
         loadProduct();
         initQuantitySelector();
         initAddToCart();
