@@ -13,11 +13,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
-
 const errorHandler = require('./middleware/errorHandler');
 
-// Only load real local environment files. .env.example is documentation,
-// not a runtime configuration file and must never override real credentials.
 const envFiles = ['.env.local', '.env'];
 for (const envFile of envFiles) {
     const envPath = path.join(__dirname, envFile);
@@ -41,25 +38,35 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
-            defaultSrc: ["'self'"], scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", 'data:', 'https://*.supabase.co'],
-            connectSrc: ["'self'", 'https://*.supabase.co'], fontSrc: ["'self'"],
-            objectSrc: ["'none'"], mediaSrc: ["'self'"], frameSrc: ["'none'"],
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", 'data:', 'https://*.supabase.co'],
+            connectSrc: ["'self'", 'https://*.supabase.co'],
+            fontSrc: ["'self'"], objectSrc: ["'none'"], mediaSrc: ["'self'"], frameSrc: ["'none'"],
         },
-    }, crossOriginEmbedderPolicy: false,
+    },
+    crossOriginEmbedderPolicy: false,
 }));
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' ? process.env.ALLOWED_ORIGIN || '*' : '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'], credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
 }));
 
 const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false,
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
     message: { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.' } },
 });
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false,
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
     message: { success: false, error: { code: 'AUTH_RATE_LIMIT_EXCEEDED', message: 'Too many authentication attempts. Please try again later.' } },
 });
 app.use('/api/', globalLimiter);
@@ -69,7 +76,9 @@ if (process.env.NODE_ENV !== 'production') app.use(morgan('dev')); else app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'cloudybreeze-default-secret', resave: false, saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'cloudybreeze-default-secret',
+    resave: false,
+    saveUninitialized: false,
     cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 24 * 60 * 60 * 1000, sameSite: 'lax' },
 }));
 
@@ -109,6 +118,7 @@ app.get('/payment/return', (req, res) => {
 app.get('/admin', (req, res) => res.redirect('/admin/login.html'));
 app.get('/admin/login.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'login.html')));
 app.get('/admin/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'dashboard.html')));
+app.get('/admin/experiment.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'experiment.html')));
 app.get('/admin/products.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'products.html')));
 app.get('/admin/product-editor.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'product-editor.html')));
 app.get('/admin/categories.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'categories.html')));
