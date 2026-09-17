@@ -7,7 +7,9 @@
 //
 // Public API:
 //   window.CloudyBreezeExperiment.track(type, data)
+//   window.CloudyBreezeExperiment.saveLead(data)
 //   window.CloudyBreezeExperiment.getSessionId()
+//   window.CloudyBreezeExperiment.getAttribution()
 // ============================================================
 
 (function () {
@@ -17,7 +19,7 @@
     var SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_vHvVfT1349nefV3o1a7--g_HVSPuFDT';
     var SESSION_STORAGE_KEY = 'cb_test_session_id';
     var ATTRIBUTION_STORAGE_KEY = 'cb_test_attribution';
-    var TRACKER_VERSION = '1.0.0';
+    var TRACKER_VERSION = '1.1.0';
     var MAX_TEXT_LENGTH = 1000;
     var MAX_METADATA_KEYS = 30;
     var DEDUPE_WINDOW_MS = 1200;
@@ -43,10 +45,6 @@
         newsletter_signup: true,
         contact_submit: true
     };
-
-    // ------------------------------------------------------------
-    // Small helpers
-    // ------------------------------------------------------------
 
     function safeLocalStorageGet(key) {
         try {
@@ -212,10 +210,6 @@
         return cleanText(path, 1000) || '/';
     }
 
-    // ------------------------------------------------------------
-    // Supabase loading / initialization
-    // ------------------------------------------------------------
-
     function loadSupabaseLibrary() {
         if (window.supabase && typeof window.supabase.createClient === 'function') {
             return Promise.resolve(window.supabase);
@@ -268,10 +262,6 @@
         });
     }
 
-    // ------------------------------------------------------------
-    // Session / event writes
-    // ------------------------------------------------------------
-
     function getSessionPayload() {
         var attribution = readAttribution();
 
@@ -303,15 +293,12 @@
                 .from('experiment_sessions')
                 .insert(getSessionPayload())
                 .then(function (result) {
-                    // A duplicate session_id is expected when the visitor returns
-                    // to an already initialized session. Treat it as success.
                     if (result.error && result.error.code !== '23505') {
                         throw result.error;
                     }
                     return true;
                 });
         }).catch(function () {
-            // Do not let tracking break the storefront. Allow a later attempt.
             sessionReadyPromise = null;
             return false;
         });
@@ -381,22 +368,94 @@
         });
     }
 
+    function sanitizeProductSummary(items) {
+        if (!Array.isArray(items)) return [];
+
+        return items.slice(0, 20).map(function (item) {
+            item = item && typeof item === 'object' && !Array.isArray(item) ? item : {};
+
+            var quantity = cleanNumber(item.quantity, 1, 99);
+            var unitPrice = cleanNumber(item.unit_price, 0, 10000000);
+            var lineTotal = cleanNumber(item.line_total, 0, 10000000);
+
+            return {
+                product_id: cleanText(item.product_id, 80),
+                product_name: cleanText(item.product_name, 200),
+                variant_id: cleanText(item.variant_id, 120),
+                variant_name: cleanText(item.variant_name, 200),
+                quantity: quantity === null ? 1 : Math.round(quantity),
+                unit_price: unitPrice === null ? 0 : Number(unitPrice.toFixed(2)),
+                line_total: lineTotal === null ? 0 : Number(lineTotal.toFixed(2))
+            };
+        });
+    }
+
+    function sanitizeLeadPayload(input) {
+        input = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
+
+        var name = cleanText(input.full_name, 120);
+        var email = cleanText(input.email, 320);
+
+        return {
+            session_id: sessionId,
+            full_name: name || '',
+            email: email || '',
+            phone: cleanText(input.phone, 60),
+            country_code: cleanText(input.country_code, 20),
+            country_name: cleanText(input.country_name, 120),
+            city: cleanText(input.city, 120),
+            address: cleanText(input.address, 300),
+            postal_code: cleanText(input.postal_code, 40),
+            product_summary: sanitizeProductSummary(input.product_summary),
+            checkout_subtotal: cleanNumber(input.checkout_subtotal, 0, 100000000),
+            checkout_shipping: cleanNumber(input.checkout_shipping, 0, 100000000),
+            checkout_total: cleanNumber(input.checkout_total, 0, 100000000),
+            currency: cleanText(input.currency, 10)
+        };
+    }
+
+    function saveLead(input) {
+        return ensureSessionRow().then(function (sessionAvailable) {
+            if (!sessionAvailable) {
+                return { success: false, error: new Error('Experiment session unavailable') };
+            }
+
+            var payload = sanitizeLeadPayload(input);
+            if (payload.full_name.length < 2 || payload.email.length < 3) {
+                return { success: false, error: new Error('Lead details are incomplete') };
+            }
+
+            return ensureClient().then(function (client) {
+                return client
+                    .from('experiment_leads')
+                    .insert(payload)
+                    .select('id, created_at')
+                    .single()
+                    .then(function (result) {
+                        if (result.error) {
+                            return { success: false, error: result.error };
+                        }
+
+                        return { success: true, data: result.data };
+                    });
+            });
+        }).catch(function (error) {
+            return { success: false, error: error };
+        });
+    }
+
     function initialize() {
         sessionId = getOrCreateSessionId();
         readAttribution();
 
-        // Create the session row first, then record the initial page view.
         ensureSessionRow().then(function () {
             track('page_view');
         });
     }
 
-    // ------------------------------------------------------------
-    // Public API
-    // ------------------------------------------------------------
-
     window.CloudyBreezeExperiment = {
         track: track,
+        saveLead: saveLead,
         getSessionId: function () {
             return sessionId || getOrCreateSessionId();
         },
