@@ -23,5 +23,7 @@ router.get('/admin/geography', analyticsController.getGeographyStats);
 router.get('/admin/pages', analyticsController.getPageStats);
 router.get('/admin/products', analyticsController.getProductStats);
 router.get('/admin/experiment', analyticsController.getExperimentOverview);
+router.get('/admin/experiment/sessions', analyticsController.getExperimentSessions);
+router.get('/admin/experiment/sessions/:sessionId', analyticsController.getExperimentSession);
 
 module.exports = router;
