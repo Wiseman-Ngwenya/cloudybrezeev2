@@ -1,12 +1,6 @@
 // ============================================================
 // CloudyBreeze Interest Test Tracker
-// Browser-side experiment tracking via Supabase.
-// ============================================================
-// Public API:
-//   window.CloudyBreezeExperiment.track(type, data)
-//   window.CloudyBreezeExperiment.saveLead(data)
-//   window.CloudyBreezeExperiment.getSessionId()
-//   window.CloudyBreezeExperiment.getAttribution()
+// Direct browser -> Supabase REST tracking.
 // ============================================================
 
 (function () {
@@ -16,10 +10,9 @@
     var SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_vHvVfT1349nefV3o1a7--g_HVSPuFDT';
     var SESSION_STORAGE_KEY = 'cb_test_session_id';
     var ATTRIBUTION_STORAGE_KEY = 'cb_test_attribution';
-    var TRACKER_VERSION = '1.2.0';
+    var TRACKER_VERSION = '1.3.0';
     var DEDUPE_WINDOW_MS = 1200;
 
-    var supabaseClient = null;
     var sessionId = null;
     var sessionReadyPromise = null;
     var recentEvents = Object.create(null);
@@ -55,11 +48,11 @@
     }
 
     function localGet(key) {
-        try { return window.localStorage.getItem(key); } catch (err) { return null; }
+        try { return window.localStorage.getItem(key); } catch (_) { return null; }
     }
 
     function localSet(key, value) {
-        try { window.localStorage.setItem(key, value); } catch (err) {}
+        try { window.localStorage.setItem(key, value); } catch (_) {}
     }
 
     function createSessionId() {
@@ -90,7 +83,7 @@
     function getAttribution() {
         var stored = localGet(ATTRIBUTION_STORAGE_KEY);
         if (stored) {
-            try { return JSON.parse(stored) || {}; } catch (err) {}
+            try { return JSON.parse(stored) || {}; } catch (_) {}
         }
 
         var params = new URLSearchParams(window.location.search);
@@ -139,44 +132,24 @@
         return text(window.location.pathname || '/', 1000) || '/';
     }
 
-    function loadSupabase() {
-        if (window.supabase && typeof window.supabase.createClient === 'function') {
-            return Promise.resolve(window.supabase);
-        }
-
-        return new Promise(function (resolve, reject) {
-            var existing = document.querySelector('script[data-cloudybreeze-supabase="true"]');
-            function finish() {
-                if (window.supabase && typeof window.supabase.createClient === 'function') resolve(window.supabase);
-                else reject(new Error('Supabase client failed to load'));
-            }
-            if (existing) {
-                existing.addEventListener('load', finish, { once: true });
-                existing.addEventListener('error', reject, { once: true });
-                return;
-            }
-            var script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-            script.async = true;
-            script.dataset.cloudybreezeSupabase = 'true';
-            script.onload = finish;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    }
-
-    function getClient() {
-        return loadSupabase().then(function (supabaseNamespace) {
-            if (!supabaseClient) {
-                supabaseClient = supabaseNamespace.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-                    auth: {
-                        persistSession: false,
-                        autoRefreshToken: false,
-                        detectSessionInUrl: false
-                    }
+    function restRequest(table, payload) {
+        return fetch(SUPABASE_URL + '/rest/v1/' + table, {
+            method: 'POST',
+            headers: {
+                apikey: SUPABASE_PUBLISHABLE_KEY,
+                Authorization: 'Bearer ' + SUPABASE_PUBLISHABLE_KEY,
+                'Content-Type': 'application/json',
+                Prefer: 'return=minimal'
+            },
+            body: JSON.stringify(payload),
+            keepalive: true
+        }).then(function (response) {
+            if (!response.ok) {
+                return response.text().catch(function () { return ''; }).then(function (body) {
+                    throw new Error('Supabase ' + response.status + (body ? ': ' + body.slice(0, 300) : ''));
                 });
             }
-            return supabaseClient;
+            return true;
         });
     }
 
@@ -204,15 +177,15 @@
 
     function ensureSession() {
         if (sessionReadyPromise) return sessionReadyPromise;
-        sessionReadyPromise = getClient().then(function (client) {
-            return client.from('experiment_sessions').insert(sessionPayload()).then(function (result) {
-                if (result.error && result.error.code !== '23505') throw result.error;
-                return true;
+
+        sessionReadyPromise = restRequest('experiment_sessions', sessionPayload())
+            .catch(function (error) {
+                // A duplicate session is safe: the session already exists.
+                if (String(error && error.message || '').indexOf('23505') !== -1) return true;
+                sessionReadyPromise = null;
+                return false;
             });
-        }).catch(function () {
-            sessionReadyPromise = null;
-            return false;
-        });
+
         return sessionReadyPromise;
     }
 
@@ -222,13 +195,10 @@
         Object.keys(input).slice(0, 30).forEach(function (key) {
             if (!/^[a-zA-Z0-9_\-]{1,80}$/.test(key)) return;
             var value = input[key];
-            if (value === null || typeof value === 'boolean') {
-                output[key] = value;
-            } else if (typeof value === 'number' && Number.isFinite(value)) {
-                output[key] = value;
-            } else if (typeof value === 'string') {
-                output[key] = text(value, 500);
-            } else if (Array.isArray(value)) {
+            if (value === null || typeof value === 'boolean') output[key] = value;
+            else if (typeof value === 'number' && Number.isFinite(value)) output[key] = value;
+            else if (typeof value === 'string') output[key] = text(value, 500);
+            else if (Array.isArray(value)) {
                 output[key] = value.slice(0, 20).map(function (item) {
                     if (item === null || typeof item === 'boolean') return item;
                     if (typeof item === 'number') return Number.isFinite(item) ? item : null;
@@ -242,6 +212,7 @@
     function track(eventType, data) {
         if (!ALLOWED_EVENT_TYPES[eventType]) return Promise.resolve(false);
         data = data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+
         var productId = text(data.product_id, 80);
         var path = text(data.page_path || pagePath(), 1000) || '/';
         var key = eventType + '|' + (productId || '') + '|' + path;
@@ -251,20 +222,18 @@
 
         return ensureSession().then(function (sessionAvailable) {
             if (!sessionAvailable) return false;
-            return getClient().then(function (client) {
-                return client.from('experiment_events').insert({
-                    session_id: sessionId,
-                    event_type: eventType,
-                    product_id: productId || null,
-                    page_path: path,
-                    metadata: Object.assign({}, sanitizeMetadata(data.metadata || {}), {
-                        tracker_version: TRACKER_VERSION
-                    })
-                }).then(function (result) {
-                    return !result.error;
-                }).catch(function () {
-                    return false;
-                });
+            return restRequest('experiment_events', {
+                session_id: sessionId,
+                event_type: eventType,
+                product_id: productId || null,
+                page_path: path,
+                metadata: Object.assign({}, sanitizeMetadata(data.metadata || {}), {
+                    tracker_version: TRACKER_VERSION
+                })
+            }).then(function () {
+                return true;
+            }).catch(function () {
+                return false;
             });
         });
     }
@@ -315,15 +284,9 @@
 
         return ensureSession().then(function (sessionAvailable) {
             if (!sessionAvailable) return { success: false, error: new Error('Experiment session unavailable') };
-            return getClient().then(function (client) {
-                // INSERT ONLY: never request the inserted row back.
-                return client.from('experiment_leads').insert(payload).then(function (result) {
-                    if (result.error) return { success: false, error: result.error };
-                    return { success: true };
-                });
-            });
-        }).catch(function (error) {
-            return { success: false, error: error };
+            return restRequest('experiment_leads', payload)
+                .then(function () { return { success: true }; })
+                .catch(function (error) { return { success: false, error: error }; });
         });
     }
 
@@ -339,8 +302,8 @@
     };
 
     function initialize() {
-        ensureSession().then(function () {
-            track('page_view');
+        ensureSession().then(function (available) {
+            if (available) track('page_view');
         });
     }
 
