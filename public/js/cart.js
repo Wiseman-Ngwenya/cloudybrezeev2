@@ -32,6 +32,86 @@
     var freeShippingNote = document.getElementById('freeShippingNote');
 
     // ============================================================
+    // Interest-test experiment tracking
+    // ============================================================
+
+    function ensureExperimentTracker() {
+        try {
+            if (window.CloudyBreezeExperiment) return;
+            if (document.querySelector('script[data-cloudybreeze-experiment="true"]')) return;
+
+            var script = document.createElement('script');
+            script.src = '/js/experiment-tracker.js';
+            script.async = true;
+            script.dataset.cloudybreezeExperiment = 'true';
+            script.onerror = function () {
+                // Experiment tracking is optional and must never break the store.
+            };
+            document.head.appendChild(script);
+        } catch (err) {
+            // Silently ignore tracker loading failures.
+        }
+    }
+
+    function trackExperimentEvent(eventType, productId, metadata) {
+        function attempt(attemptNumber) {
+            var tracker = window.CloudyBreezeExperiment;
+
+            if (tracker && typeof tracker.track === 'function') {
+                try {
+                    tracker.track(eventType, {
+                        product_id: productId ? String(productId) : null,
+                        page_path: window.location.pathname,
+                        metadata: metadata || {}
+                    });
+                } catch (err) {
+                    // Experiment tracking must never interrupt a customer action.
+                }
+                return;
+            }
+
+            if (attemptNumber < 30) {
+                window.setTimeout(function () {
+                    attempt(attemptNumber + 1);
+                }, 100);
+            }
+        }
+
+        attempt(0);
+    }
+
+    function trackCartView(cart) {
+        if (!Array.isArray(cart) || cart.length === 0) return;
+
+        var totalQuantity = cart.reduce(function (sum, item) {
+            return sum + (Number(item.quantity) || 0);
+        }, 0);
+
+        var subtotal = cart.reduce(function (sum, item) {
+            return sum + ((Number(item.price) || 0) * (Number(item.quantity) || 0));
+        }, 0);
+
+        trackExperimentEvent('cart_view', null, {
+            item_count: cart.length,
+            total_quantity: totalQuantity,
+            subtotal: Number(subtotal.toFixed(2))
+        });
+    }
+
+    function trackRemovedItem(item) {
+        if (!item) return;
+
+        trackExperimentEvent('remove_from_cart', item.product_id, {
+            product_name: item.product_name || null,
+            quantity: Number(item.quantity) || 1,
+            unit_price: Number((Number(item.price) || 0).toFixed(2)),
+            variant_id: item.variant_id || null,
+            variant_name: item.variant_name || null,
+            source: 'cart'
+        });
+    }
+
+    // ============================================================
     // Load Cart
     // ============================================================
 
@@ -40,12 +120,16 @@
      * Loads cart, store settings, and renders the UI.
      */
     function initCart() {
+        ensureExperimentTracker();
+
         var cart = window.CloudyBreeze.getCart();
 
         if (cart.length === 0) {
             showEmptyCart();
             return;
         }
+
+        trackCartView(cart);
 
         loadStoreSettings()
             .then(function () {
@@ -198,6 +282,7 @@
                 var cart = window.CloudyBreeze.getCart();
                 if (cart[index]) {
                     var item = cart[index];
+                    trackRemovedItem(item);
                     window.CloudyBreeze.removeFromCart(item.product_id, item.variant_id);
                     refreshCartDisplay();
                 }
