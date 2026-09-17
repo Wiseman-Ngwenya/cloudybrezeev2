@@ -97,6 +97,19 @@ const getExperimentOverview = asyncHandler(async (req, res) => {
     res.status(200).json(successResponse(overview));
 });
 
+const getExperimentSessions = asyncHandler(async (req, res) => {
+    const result = await experimentService.getRecentSessions({
+        limit: req.query.limit,
+        offset: req.query.offset,
+    });
+    res.status(200).json(successResponse(result));
+});
+
+const getExperimentSession = asyncHandler(async (req, res) => {
+    const result = await experimentService.getSessionDetail(req.params.sessionId);
+    res.status(200).json(successResponse(result));
+});
+
 module.exports = {
     recordPageView,
     recordProductView,
@@ -106,4 +119,6 @@ module.exports = {
     getPageStats,
     getProductStats,
     getExperimentOverview,
+    getExperimentSessions,
+    getExperimentSession,
 };
