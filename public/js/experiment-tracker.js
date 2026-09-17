@@ -1,10 +1,7 @@
 // ============================================================
 // CloudyBreeze Interest Test Tracker
-// Serverless browser-side experiment tracking via Supabase.
+// Browser-side experiment tracking via Supabase.
 // ============================================================
-// This module intentionally uses only a Supabase publishable key.
-// It never contains or requests a service/secret key.
-//
 // Public API:
 //   window.CloudyBreezeExperiment.track(type, data)
 //   window.CloudyBreezeExperiment.saveLead(data)
@@ -19,9 +16,7 @@
     var SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_vHvVfT1349nefV3o1a7--g_HVSPuFDT';
     var SESSION_STORAGE_KEY = 'cb_test_session_id';
     var ATTRIBUTION_STORAGE_KEY = 'cb_test_attribution';
-    var TRACKER_VERSION = '1.1.0';
-    var MAX_TEXT_LENGTH = 1000;
-    var MAX_METADATA_KEYS = 30;
+    var TRACKER_VERSION = '1.2.0';
     var DEDUPE_WINDOW_MS = 1200;
 
     var supabaseClient = null;
@@ -46,147 +41,85 @@
         contact_submit: true
     };
 
-    function safeLocalStorageGet(key) {
-        try {
-            return window.localStorage.getItem(key);
-        } catch (err) {
-            return null;
-        }
+    function text(value, maxLength) {
+        if (value === null || value === undefined) return null;
+        var valueText = String(value).trim();
+        if (!valueText) return null;
+        return valueText.slice(0, maxLength || 1000);
     }
 
-    function safeLocalStorageSet(key, value) {
-        try {
-            window.localStorage.setItem(key, value);
-            return true;
-        } catch (err) {
-            return false;
-        }
+    function number(value, min, max) {
+        var result = Number(value);
+        if (!Number.isFinite(result) || result < min || result > max) return null;
+        return result;
     }
 
-    function generateSessionId() {
+    function localGet(key) {
+        try { return window.localStorage.getItem(key); } catch (err) { return null; }
+    }
+
+    function localSet(key, value) {
+        try { window.localStorage.setItem(key, value); } catch (err) {}
+    }
+
+    function createSessionId() {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
             return window.crypto.randomUUID();
         }
-
         if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
             var bytes = new Uint8Array(16);
             window.crypto.getRandomValues(bytes);
-            bytes[6] = (bytes[6] & 0x0f) | 0x40;
-            bytes[8] = (bytes[8] & 0x3f) | 0x80;
-
-            var hex = Array.prototype.map.call(bytes, function (byte) {
-                return byte.toString(16).padStart(2, '0');
+            bytes[6] = (bytes[6] & 15) | 64;
+            bytes[8] = (bytes[8] & 63) | 128;
+            var hex = Array.prototype.map.call(bytes, function (b) {
+                return b.toString(16).padStart(2, '0');
             }).join('');
-
             return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-' + hex.slice(12, 16) + '-' + hex.slice(16, 20) + '-' + hex.slice(20);
         }
-
-        return 'cb-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + '-' + Math.random().toString(36).slice(2);
+        return 'cb-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
     }
 
     function getOrCreateSessionId() {
-        var existing = safeLocalStorageGet(SESSION_STORAGE_KEY);
-
-        if (existing && typeof existing === 'string' && existing.length >= 16 && existing.length <= 128) {
-            return existing;
-        }
-
-        var created = generateSessionId();
-        safeLocalStorageSet(SESSION_STORAGE_KEY, created);
+        var existing = localGet(SESSION_STORAGE_KEY);
+        if (existing && existing.length >= 16 && existing.length <= 128) return existing;
+        var created = createSessionId();
+        localSet(SESSION_STORAGE_KEY, created);
         return created;
     }
 
-    function cleanText(value, maxLength) {
-        if (value === null || value === undefined) return null;
-        var text = String(value).trim();
-        if (!text) return null;
-        return text.slice(0, maxLength || MAX_TEXT_LENGTH);
-    }
-
-    function cleanNumber(value, min, max) {
-        var number = Number(value);
-        if (!Number.isFinite(number)) return null;
-        if (number < min || number > max) return null;
-        return number;
-    }
-
-    function sanitizeMetadata(input) {
-        if (!input || typeof input !== 'object' || Array.isArray(input)) return {};
-
-        var output = {};
-        var keys = Object.keys(input).slice(0, MAX_METADATA_KEYS);
-
-        keys.forEach(function (key) {
-            if (!/^[a-zA-Z0-9_\-]{1,80}$/.test(key)) return;
-
-            var value = input[key];
-
-            if (value === null || typeof value === 'boolean' || typeof value === 'number') {
-                if (typeof value !== 'number' || Number.isFinite(value)) {
-                    output[key] = value;
-                }
-                return;
-            }
-
-            if (typeof value === 'string') {
-                output[key] = cleanText(value, 500);
-                return;
-            }
-
-            if (Array.isArray(value)) {
-                output[key] = value.slice(0, 20).map(function (item) {
-                    if (item === null || typeof item === 'boolean') return item;
-                    if (typeof item === 'number') return Number.isFinite(item) ? item : null;
-                    return cleanText(item, 200);
-                });
-            }
-        });
-
-        return output;
-    }
-
-    function readAttribution() {
-        var existing = safeLocalStorageGet(ATTRIBUTION_STORAGE_KEY);
-
-        if (existing) {
-            try {
-                return JSON.parse(existing) || {};
-            } catch (err) {
-                // Ignore malformed local storage values.
-            }
+    function getAttribution() {
+        var stored = localGet(ATTRIBUTION_STORAGE_KEY);
+        if (stored) {
+            try { return JSON.parse(stored) || {}; } catch (err) {}
         }
 
         var params = new URLSearchParams(window.location.search);
         var attribution = {
             landing_page: window.location.pathname || '/',
-            referrer: document.referrer ? cleanText(document.referrer, 2000) : null,
-            utm_source: cleanText(params.get('utm_source'), 200),
-            utm_medium: cleanText(params.get('utm_medium'), 200),
-            utm_campaign: cleanText(params.get('utm_campaign'), 200),
-            utm_content: cleanText(params.get('utm_content'), 200),
-            utm_term: cleanText(params.get('utm_term'), 200)
+            referrer: text(document.referrer, 2000),
+            utm_source: text(params.get('utm_source'), 200),
+            utm_medium: text(params.get('utm_medium'), 200),
+            utm_campaign: text(params.get('utm_campaign'), 200),
+            utm_content: text(params.get('utm_content'), 200),
+            utm_term: text(params.get('utm_term'), 200)
         };
-
-        safeLocalStorageSet(ATTRIBUTION_STORAGE_KEY, JSON.stringify(attribution));
+        localSet(ATTRIBUTION_STORAGE_KEY, JSON.stringify(attribution));
         return attribution;
     }
 
-    function detectBrowser() {
+    function browserName() {
         var ua = navigator.userAgent || '';
-
         if (/Edg\//.test(ua)) return 'Edge';
         if (/OPR\//.test(ua) || /Opera/.test(ua)) return 'Opera';
         if (/Firefox\//.test(ua)) return 'Firefox';
-        if (/Chrome\//.test(ua) && !/Edg\//.test(ua)) return 'Chrome';
-        if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) return 'Safari';
-        if (/MSIE|Trident\//.test(ua)) return 'Internet Explorer';
+        if (/Chrome\//.test(ua)) return 'Chrome';
+        if (/Safari\//.test(ua)) return 'Safari';
         return 'Unknown';
     }
 
-    function detectOperatingSystem() {
+    function osName() {
         var ua = navigator.userAgent || '';
         var platform = navigator.platform || '';
-
         if (/Windows/i.test(ua) || /Win/i.test(platform)) return 'Windows';
         if (/Android/i.test(ua)) return 'Android';
         if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
@@ -195,43 +128,33 @@
         return 'Unknown';
     }
 
-    function detectDeviceType() {
+    function deviceType() {
         var ua = navigator.userAgent || '';
-        var width = window.innerWidth || 0;
         var mobileLike = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-
         if (!mobileLike) return 'desktop';
-        if (width >= 768) return 'tablet';
-        return 'mobile';
+        return (window.innerWidth || 0) >= 768 ? 'tablet' : 'mobile';
     }
 
-    function getPagePath() {
-        var path = window.location.pathname || '/';
-        return cleanText(path, 1000) || '/';
+    function pagePath() {
+        return text(window.location.pathname || '/', 1000) || '/';
     }
 
-    function loadSupabaseLibrary() {
+    function loadSupabase() {
         if (window.supabase && typeof window.supabase.createClient === 'function') {
             return Promise.resolve(window.supabase);
         }
 
         return new Promise(function (resolve, reject) {
-            var existingScript = document.querySelector('script[data-cloudybreeze-supabase="true"]');
-
+            var existing = document.querySelector('script[data-cloudybreeze-supabase="true"]');
             function finish() {
-                if (window.supabase && typeof window.supabase.createClient === 'function') {
-                    resolve(window.supabase);
-                } else {
-                    reject(new Error('Supabase client failed to load'));
-                }
+                if (window.supabase && typeof window.supabase.createClient === 'function') resolve(window.supabase);
+                else reject(new Error('Supabase client failed to load'));
             }
-
-            if (existingScript) {
-                existingScript.addEventListener('load', finish, { once: true });
-                existingScript.addEventListener('error', reject, { once: true });
+            if (existing) {
+                existing.addEventListener('load', finish, { once: true });
+                existing.addEventListener('error', reject, { once: true });
                 return;
             }
-
             var script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
             script.async = true;
@@ -242,147 +165,122 @@
         });
     }
 
-    function ensureClient() {
-        return loadSupabaseLibrary().then(function (supabaseNamespace) {
+    function getClient() {
+        return loadSupabase().then(function (supabaseNamespace) {
             if (!supabaseClient) {
-                supabaseClient = supabaseNamespace.createClient(
-                    SUPABASE_URL,
-                    SUPABASE_PUBLISHABLE_KEY,
-                    {
-                        auth: {
-                            persistSession: false,
-                            autoRefreshToken: false,
-                            detectSessionInUrl: false
-                        }
+                supabaseClient = supabaseNamespace.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+                    auth: {
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false
                     }
-                );
+                });
             }
-
             return supabaseClient;
         });
     }
 
-    function getSessionPayload() {
-        var attribution = readAttribution();
-
+    function sessionPayload() {
+        var attribution = getAttribution();
         return {
             session_id: sessionId,
-            landing_page: attribution.landing_page,
+            landing_page: attribution.landing_page || '/',
             referrer: attribution.referrer,
             utm_source: attribution.utm_source,
             utm_medium: attribution.utm_medium,
             utm_campaign: attribution.utm_campaign,
             utm_content: attribution.utm_content,
             utm_term: attribution.utm_term,
-            device_type: detectDeviceType(),
-            browser: detectBrowser(),
-            os: detectOperatingSystem(),
-            user_agent: cleanText(navigator.userAgent, 1000),
-            screen_width: cleanNumber(window.screen && window.screen.width, 1, 10000),
-            screen_height: cleanNumber(window.screen && window.screen.height, 1, 10000),
-            timezone: cleanText(Intl.DateTimeFormat().resolvedOptions().timeZone, 200),
-            language: cleanText(navigator.language, 50)
+            device_type: deviceType(),
+            browser: browserName(),
+            os: osName(),
+            user_agent: text(navigator.userAgent, 1000),
+            screen_width: number(window.screen && window.screen.width, 1, 10000),
+            screen_height: number(window.screen && window.screen.height, 1, 10000),
+            timezone: text(Intl.DateTimeFormat().resolvedOptions().timeZone, 200),
+            language: text(navigator.language, 50)
         };
     }
 
-    function ensureSessionRow() {
+    function ensureSession() {
         if (sessionReadyPromise) return sessionReadyPromise;
-
-        sessionReadyPromise = ensureClient().then(function (client) {
-            return client
-                .from('experiment_sessions')
-                .insert(getSessionPayload())
-                .then(function (result) {
-                    if (result.error && result.error.code !== '23505') {
-                        throw result.error;
-                    }
-                    return true;
-                });
+        sessionReadyPromise = getClient().then(function (client) {
+            return client.from('experiment_sessions').insert(sessionPayload()).then(function (result) {
+                if (result.error && result.error.code !== '23505') throw result.error;
+                return true;
+            });
         }).catch(function () {
             sessionReadyPromise = null;
             return false;
         });
-
         return sessionReadyPromise;
     }
 
-    function makeEventKey(eventType, data) {
-        var productPart = data && data.product_id ? String(data.product_id) : '';
-        var pathPart = data && data.page_path ? String(data.page_path) : getPagePath();
-        return eventType + '|' + productPart + '|' + pathPart;
-    }
-
-    function isDuplicateEvent(key) {
-        var now = Date.now();
-        var previous = recentEvents[key];
-
-        recentEvents[key] = now;
-
-        if (!previous) return false;
-        return (now - previous) < DEDUPE_WINDOW_MS;
-    }
-
-    function normalizeEventData(data) {
-        data = data && typeof data === 'object' && !Array.isArray(data) ? data : {};
-
-        return {
-            product_id: cleanText(data.product_id, 80),
-            page_path: cleanText(data.page_path || getPagePath(), 1000),
-            metadata: sanitizeMetadata(data.metadata || {})
-        };
+    function sanitizeMetadata(input) {
+        if (!input || typeof input !== 'object' || Array.isArray(input)) return {};
+        var output = {};
+        Object.keys(input).slice(0, 30).forEach(function (key) {
+            if (!/^[a-zA-Z0-9_\-]{1,80}$/.test(key)) return;
+            var value = input[key];
+            if (value === null || typeof value === 'boolean') {
+                output[key] = value;
+            } else if (typeof value === 'number' && Number.isFinite(value)) {
+                output[key] = value;
+            } else if (typeof value === 'string') {
+                output[key] = text(value, 500);
+            } else if (Array.isArray(value)) {
+                output[key] = value.slice(0, 20).map(function (item) {
+                    if (item === null || typeof item === 'boolean') return item;
+                    if (typeof item === 'number') return Number.isFinite(item) ? item : null;
+                    return text(item, 200);
+                });
+            }
+        });
+        return output;
     }
 
     function track(eventType, data) {
         if (!ALLOWED_EVENT_TYPES[eventType]) return Promise.resolve(false);
+        data = data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+        var productId = text(data.product_id, 80);
+        var path = text(data.page_path || pagePath(), 1000) || '/';
+        var key = eventType + '|' + (productId || '') + '|' + path;
+        var now = Date.now();
+        if (recentEvents[key] && now - recentEvents[key] < DEDUPE_WINDOW_MS) return Promise.resolve(false);
+        recentEvents[key] = now;
 
-        var normalized = normalizeEventData(data);
-        var dedupeKey = makeEventKey(eventType, normalized);
-
-        if (isDuplicateEvent(dedupeKey)) {
-            return Promise.resolve(false);
-        }
-
-        return ensureSessionRow().then(function (sessionAvailable) {
+        return ensureSession().then(function (sessionAvailable) {
             if (!sessionAvailable) return false;
-
-            return ensureClient().then(function (client) {
-                return client
-                    .from('experiment_events')
-                    .insert({
-                        session_id: sessionId,
-                        event_type: eventType,
-                        product_id: normalized.product_id || null,
-                        page_path: normalized.page_path,
-                        metadata: Object.assign({}, normalized.metadata, {
-                            tracker_version: TRACKER_VERSION
-                        })
+            return getClient().then(function (client) {
+                return client.from('experiment_events').insert({
+                    session_id: sessionId,
+                    event_type: eventType,
+                    product_id: productId || null,
+                    page_path: path,
+                    metadata: Object.assign({}, sanitizeMetadata(data.metadata || {}), {
+                        tracker_version: TRACKER_VERSION
                     })
-                    .then(function (result) {
-                        if (result.error) throw result.error;
-                        return true;
-                    })
-                    .catch(function () {
-                        return false;
-                    });
+                }).then(function (result) {
+                    return !result.error;
+                }).catch(function () {
+                    return false;
+                });
             });
         });
     }
 
-    function sanitizeProductSummary(items) {
+    function sanitizeProducts(items) {
         if (!Array.isArray(items)) return [];
-
         return items.slice(0, 20).map(function (item) {
             item = item && typeof item === 'object' && !Array.isArray(item) ? item : {};
-
-            var quantity = cleanNumber(item.quantity, 1, 99);
-            var unitPrice = cleanNumber(item.unit_price, 0, 10000000);
-            var lineTotal = cleanNumber(item.line_total, 0, 10000000);
-
+            var quantity = number(item.quantity, 1, 99);
+            var unitPrice = number(item.unit_price, 0, 10000000);
+            var lineTotal = number(item.line_total, 0, 10000000);
             return {
-                product_id: cleanText(item.product_id, 80),
-                product_name: cleanText(item.product_name, 200),
-                variant_id: cleanText(item.variant_id, 120),
-                variant_name: cleanText(item.variant_name, 200),
+                product_id: text(item.product_id, 80),
+                product_name: text(item.product_name, 200),
+                variant_id: text(item.variant_id, 120),
+                variant_name: text(item.variant_name, 200),
                 quantity: quantity === null ? 1 : Math.round(quantity),
                 unit_price: unitPrice === null ? 0 : Number(unitPrice.toFixed(2)),
                 line_total: lineTotal === null ? 0 : Number(lineTotal.toFixed(2))
@@ -390,78 +288,61 @@
         });
     }
 
-    function sanitizeLeadPayload(input) {
-        input = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
-
-        var name = cleanText(input.full_name, 120);
-        var email = cleanText(input.email, 320);
-
-        return {
-            session_id: sessionId,
-            full_name: name || '',
-            email: email || '',
-            phone: cleanText(input.phone, 60),
-            country_code: cleanText(input.country_code, 20),
-            country_name: cleanText(input.country_name, 120),
-            city: cleanText(input.city, 120),
-            address: cleanText(input.address, 300),
-            postal_code: cleanText(input.postal_code, 40),
-            product_summary: sanitizeProductSummary(input.product_summary),
-            checkout_subtotal: cleanNumber(input.checkout_subtotal, 0, 100000000),
-            checkout_shipping: cleanNumber(input.checkout_shipping, 0, 100000000),
-            checkout_total: cleanNumber(input.checkout_total, 0, 100000000),
-            currency: cleanText(input.currency, 10)
-        };
-    }
-
     function saveLead(input) {
-        return ensureSessionRow().then(function (sessionAvailable) {
-            if (!sessionAvailable) {
-                return { success: false, error: new Error('Experiment session unavailable') };
-            }
+        input = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
+        var name = text(input.full_name, 120) || '';
+        var email = text(input.email, 320) || '';
+        if (name.length < 2 || email.length < 3) {
+            return Promise.resolve({ success: false, error: new Error('Lead details are incomplete') });
+        }
 
-            var payload = sanitizeLeadPayload(input);
-            if (payload.full_name.length < 2 || payload.email.length < 3) {
-                return { success: false, error: new Error('Lead details are incomplete') };
-            }
+        var payload = {
+            session_id: sessionId,
+            full_name: name,
+            email: email,
+            phone: text(input.phone, 60),
+            country_code: text(input.country_code, 20),
+            country_name: text(input.country_name, 120),
+            city: text(input.city, 120),
+            address: text(input.address, 300),
+            postal_code: text(input.postal_code, 40),
+            product_summary: sanitizeProducts(input.product_summary),
+            checkout_subtotal: number(input.checkout_subtotal, 0, 100000000),
+            checkout_shipping: number(input.checkout_shipping, 0, 100000000),
+            checkout_total: number(input.checkout_total, 0, 100000000),
+            currency: text(input.currency, 10)
+        };
 
-            return ensureClient().then(function (client) {
-                return client
-                    .from('experiment_leads')
-                    .insert(payload)
-                    .select('id, created_at')
-                    .single()
-                    .then(function (result) {
-                        if (result.error) {
-                            return { success: false, error: result.error };
-                        }
-
-                        return { success: true, data: result.data };
-                    });
+        return ensureSession().then(function (sessionAvailable) {
+            if (!sessionAvailable) return { success: false, error: new Error('Experiment session unavailable') };
+            return getClient().then(function (client) {
+                // INSERT ONLY: never request the inserted row back.
+                return client.from('experiment_leads').insert(payload).then(function (result) {
+                    if (result.error) return { success: false, error: result.error };
+                    return { success: true };
+                });
             });
         }).catch(function (error) {
             return { success: false, error: error };
         });
     }
 
-    function initialize() {
-        sessionId = getOrCreateSessionId();
-        readAttribution();
-
-        ensureSessionRow().then(function () {
-            track('page_view');
-        });
-    }
+    sessionId = getOrCreateSessionId();
+    getAttribution();
 
     window.CloudyBreezeExperiment = {
         track: track,
         saveLead: saveLead,
-        getSessionId: function () {
-            return sessionId || getOrCreateSessionId();
-        },
-        getAttribution: readAttribution,
+        getSessionId: function () { return sessionId; },
+        getAttribution: getAttribution,
         version: TRACKER_VERSION
     };
+
+    function initialize() {
+        ensureSession().then(function () {
+            track('page_view');
+        });
+    }
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initialize, { once: true });
