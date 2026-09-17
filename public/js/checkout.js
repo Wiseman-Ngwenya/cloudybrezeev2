@@ -13,6 +13,72 @@
     var successOrderNumber = document.getElementById('successOrderNumber');
     var shippingCountry = document.getElementById('shippingCountry');
     var shippingCountryMessage = document.getElementById('shippingCountryMessage');
+    var checkoutStartedTracked = false;
+
+    function ensureExperimentTracker() {
+        try {
+            if (window.CloudyBreezeExperiment) return;
+            if (document.querySelector('script[data-cloudybreeze-experiment="true"]')) return;
+
+            var script = document.createElement('script');
+            script.src = '/js/experiment-tracker.js';
+            script.async = true;
+            script.dataset.cloudybreezeExperiment = 'true';
+            script.onerror = function () {};
+            document.head.appendChild(script);
+        } catch (err) {
+            // Experiment tracking is optional and must never break checkout.
+        }
+    }
+
+    function trackExperimentEvent(eventType, metadata) {
+        function attempt(attemptNumber) {
+            var tracker = window.CloudyBreezeExperiment;
+            if (tracker && typeof tracker.track === 'function') {
+                try {
+                    tracker.track(eventType, {
+                        page_path: window.location.pathname,
+                        metadata: metadata || {}
+                    });
+                } catch (err) {
+                    // Experiment tracking must never interrupt checkout.
+                }
+                return;
+            }
+
+            if (attemptNumber < 30) {
+                window.setTimeout(function () {
+                    attempt(attemptNumber + 1);
+                }, 100);
+            }
+        }
+
+        attempt(0);
+    }
+
+    function trackCheckoutStarted() {
+        if (checkoutStartedTracked || !window.CloudyBreeze || typeof window.CloudyBreeze.getCart !== 'function') return;
+
+        var cart = window.CloudyBreeze.getCart();
+        if (!Array.isArray(cart) || cart.length === 0) return;
+
+        checkoutStartedTracked = true;
+
+        var totalQuantity = cart.reduce(function (sum, item) {
+            return sum + (Number(item.quantity) || 0);
+        }, 0);
+
+        var subtotal = cart.reduce(function (sum, item) {
+            return sum + ((Number(item.price) || 0) * (Number(item.quantity) || 0));
+        }, 0);
+
+        trackExperimentEvent('checkout_started', {
+            item_count: cart.length,
+            total_quantity: totalQuantity,
+            subtotal: Number(subtotal.toFixed(2)),
+            source: 'checkout_page'
+        });
+    }
 
     function initPaymentMethod() {
         var options = document.querySelector('.payment-options');
@@ -240,11 +306,13 @@
     }
 
     function init() {
+        ensureExperimentTracker();
         initPaymentMethod();
         handlePaymentReturn();
         initShippingCountries().then(function () {
             handleCountryChange();
             initCheckoutForm();
+            trackCheckoutStarted();
         });
     }
 
