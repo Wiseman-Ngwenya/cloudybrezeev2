@@ -2,8 +2,8 @@
 // CloudyBreeze E-Commerce System
 // Client-Side Analytics Tracker
 // ============================================================
-// Tracks page views and sends anonymized visitor data to the
-// backend analytics endpoint.
+// Tracks existing backend analytics and, on the interest-test
+// branch, loads the independent serverless experiment tracker.
 //
 // CRITICAL: This script must NEVER block page rendering or
 // interfere with user interactions. All tracking is fire-and-forget.
@@ -23,11 +23,6 @@
     // User Agent Parsing
     // ============================================================
 
-    /**
-     * Detect the user's browser name from the user agent string.
-     *
-     * @returns {string} Browser name or 'Unknown'
-     */
     function detectBrowser() {
         const ua = navigator.userAgent;
 
@@ -41,11 +36,6 @@
         return 'Unknown';
     }
 
-    /**
-     * Detect the user's operating system from the user agent string.
-     *
-     * @returns {string} Operating system name or 'Unknown'
-     */
     function detectOperatingSystem() {
         const ua = navigator.userAgent;
         const platform = navigator.platform || '';
@@ -59,16 +49,9 @@
         return 'Unknown';
     }
 
-    /**
-     * Detect the device type from screen width and user agent.
-     *
-     * @returns {string} 'desktop', 'tablet', or 'mobile'
-     */
     function detectDevice() {
         const ua = navigator.userAgent;
         const width = window.innerWidth;
-
-        // Check for mobile/tablet user agents
         const isMobileUA = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
 
         if (!isMobileUA) return 'desktop';
@@ -77,15 +60,9 @@
     }
 
     // ============================================================
-    // Tracking Function
+    // Existing backend analytics
     // ============================================================
 
-    /**
-     * Send a page view event to the backend analytics endpoint.
-     * This is fire-and-forget; errors are silently ignored.
-     *
-     * @param {string} [pageUrl] - The page URL to track (defaults to current pathname)
-     */
     function trackPageView(pageUrl) {
         if (!TRACKING_ENABLED) return;
 
@@ -93,24 +70,20 @@
             const page = pageUrl || window.location.pathname;
             const referrer = document.referrer || null;
 
-            // Build visitor data payload
             const visitorData = {
                 page: page,
                 referrer: referrer,
                 browser: detectBrowser(),
                 operating_system: detectOperatingSystem(),
                 device: detectDevice(),
-                // Country and city will be determined server-side from IP
             };
 
-            // Send via sendBeacon if available (more reliable, doesn't block unload)
             if (navigator.sendBeacon) {
                 const blob = new Blob([JSON.stringify(visitorData)], {
                     type: 'application/json',
                 });
                 navigator.sendBeacon(ANALYTICS_ENDPOINT, blob);
             } else {
-                // Fallback to fetch with no-cors and keepalive
                 fetch(ANALYTICS_ENDPOINT, {
                     method: 'POST',
                     headers: {
@@ -118,12 +91,32 @@
                     },
                     body: JSON.stringify(visitorData),
                     keepalive: true,
-                }).catch(function () {
-                    // Silently ignore - analytics failures must never break the site
-                });
+                }).catch(function () {});
             }
         } catch (err) {
-            // Silently ignore all errors
+            // Analytics failures must never break the site.
+        }
+    }
+
+    // ============================================================
+    // Interest-test tracker loader
+    // ============================================================
+
+    function loadInterestTestTracker() {
+        try {
+            if (window.CloudyBreezeExperiment) return;
+            if (document.querySelector('script[data-cloudybreeze-experiment="true"]')) return;
+
+            var script = document.createElement('script');
+            script.src = '/js/experiment-tracker.js';
+            script.async = true;
+            script.dataset.cloudybreezeExperiment = 'true';
+            script.onerror = function () {
+                // Experiment tracking is optional and must never break the store.
+            };
+            document.head.appendChild(script);
+        } catch (err) {
+            // Silently ignore tracker loading failures.
         }
     }
 
@@ -131,15 +124,10 @@
     // Initialization
     // ============================================================
 
-    /**
-     * Track the initial page view when the script loads.
-     */
     function init() {
-        // Track the current page
         trackPageView();
+        loadInterestTestTracker();
 
-        // Track single-page navigation if using History API
-        // This handles cases where navigation happens via JS
         var originalPushState = history.pushState;
         var originalReplaceState = history.replaceState;
 
@@ -153,15 +141,11 @@
             trackPageView();
         };
 
-        // Handle back/forward navigation
         window.addEventListener('popstate', function () {
             trackPageView();
         });
     }
 
-    // ============================================================
-    // Start Tracking
-    // ============================================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
