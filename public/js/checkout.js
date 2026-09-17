@@ -6,6 +6,7 @@
 // - Never starts a real payment
 // - Records meaningful checkout intent events
 // - Saves submitted customer details to experiment_leads
+// - Reveals payment availability only after details are submitted
 // ============================================================
 
 (function () {
@@ -15,14 +16,15 @@
     var placeOrderBtn = document.getElementById('placeOrderBtn');
     var checkoutMessage = document.getElementById('checkoutMessage');
     var checkoutContent = document.getElementById('checkoutContent');
-    var checkoutSuccess = document.getElementById('checkoutSuccess');
-    var successOrderNumber = document.getElementById('successOrderNumber');
+    var paymentSection = document.getElementById('paymentSection');
+    var paymentUnavailablePanel = document.getElementById('paymentUnavailablePanel');
     var shippingCountry = document.getElementById('shippingCountry');
     var shippingCountryMessage = document.getElementById('shippingCountryMessage');
 
     var checkoutStartedTracked = false;
     var checkoutFormStartedTracked = false;
     var leadSaveInProgress = false;
+    var paymentStageShown = false;
 
     function ensureExperimentTracker() {
         try {
@@ -148,13 +150,18 @@
 
     function initPaymentMethod() {
         var options = document.querySelector('.payment-options');
+
+        if (paymentSection) {
+            paymentSection.style.display = 'none';
+        }
+
         if (!options) return;
 
         options.innerHTML =
             '<div class="payment-option">' +
                 '<div class="payment-option-content">' +
                     '<span class="payment-option-title">Payment currently unavailable</span>' +
-                    '<span class="payment-option-desc">We are currently setting up payment processing for your region. You will not be charged and no order will be placed in this test.</span>' +
+                    '<span class="payment-option-desc">We are currently setting up payment processing for your region. No payment will be taken and no order will be placed.</span>' +
                 '</div>' +
             '</div>';
     }
@@ -276,13 +283,52 @@
         };
     }
 
+    function getCheckoutSummaryMetadata(cartTotals) {
+        return {
+            item_count: cartTotals.items.length,
+            total_quantity: getCurrentCart().reduce(function (sum, item) {
+                return sum + (Number(item.quantity) || 0);
+            }, 0),
+            subtotal: Number((Number(cartTotals.subtotal) || 0).toFixed(2)),
+            shipping: Number((Number(cartTotals.shippingCost) || 0).toFixed(2)),
+            total: Number((Number(cartTotals.total) || 0).toFixed(2))
+        };
+    }
+
+    function showPaymentUnavailable() {
+        if (paymentStageShown) return;
+        paymentStageShown = true;
+
+        if (placeOrderBtn) {
+            placeOrderBtn.style.display = 'none';
+        }
+
+        if (paymentSection) {
+            paymentSection.style.display = 'block';
+        }
+
+        if (paymentUnavailablePanel) {
+            paymentUnavailablePanel.style.display = 'block';
+        }
+
+        if (checkoutMessage) {
+            checkoutMessage.style.display = 'none';
+        }
+
+        var target = paymentSection || checkoutForm;
+        if (target && typeof target.scrollIntoView === 'function') {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
     function initCheckoutForm() {
         if (!checkoutForm) return;
 
         checkoutForm.addEventListener('submit', function (e) {
             e.preventDefault();
             hideMessage();
-            if (leadSaveInProgress) return;
+
+            if (leadSaveInProgress || paymentStageShown) return;
             if (!validateForm()) return;
 
             var cartTotals = getCurrentTotals();
@@ -297,17 +343,19 @@
                 return;
             }
 
+            var summaryMetadata = getCheckoutSummaryMetadata(cartTotals);
             trackCheckoutFormStarted();
+
+            // This records the visitor's explicit attempt to move from checkout
+            // details into the payment stage. No real payment is attempted.
             trackExperimentEvent('payment_attempt', {
-                item_count: cartTotals.items.length,
-                total_quantity: getCurrentCart().reduce(function (sum, item) {
-                    return sum + (Number(item.quantity) || 0);
-                }, 0),
-                subtotal: Number((Number(cartTotals.subtotal) || 0).toFixed(2)),
-                shipping: Number((Number(cartTotals.shippingCost) || 0).toFixed(2)),
-                total: Number((Number(cartTotals.total) || 0).toFixed(2)),
+                item_count: summaryMetadata.item_count,
+                total_quantity: summaryMetadata.total_quantity,
+                subtotal: summaryMetadata.subtotal,
+                shipping: summaryMetadata.shipping,
+                total: summaryMetadata.total,
                 payment_available: false,
-                source: 'checkout_submit'
+                source: 'proceed_to_payment'
             });
 
             leadSaveInProgress = true;
@@ -319,29 +367,22 @@
 
                 var leadSaved = !!(result && result.success);
 
-                trackExperimentEvent('payment_unavailable', {
-                    lead_saved: leadSaved,
-                    reason: 'payment_not_available_for_region',
-                    source: 'checkout_submit'
-                });
-
                 if (!leadSaved) {
-                    showMessage('We could not save your request right now. No payment was taken and no order was placed. Please try again.', 'error');
+                    showMessage('We could not save your details right now. No payment was taken and no order was placed. Please try again.', 'error');
                     return;
                 }
 
-                trackExperimentEvent('checkout_form_completed', {
-                    item_count: cartTotals.items.length,
-                    total_quantity: getCurrentCart().reduce(function (sum, item) {
-                        return sum + (Number(item.quantity) || 0);
-                    }, 0),
-                    subtotal: Number((Number(cartTotals.subtotal) || 0).toFixed(2)),
-                    shipping: Number((Number(cartTotals.shippingCost) || 0).toFixed(2)),
-                    total: Number((Number(cartTotals.total) || 0).toFixed(2)),
-                    source: 'checkout_submit'
+                trackExperimentEvent('checkout_form_completed', Object.assign({}, summaryMetadata, {
+                    source: 'proceed_to_payment'
+                }));
+
+                trackExperimentEvent('payment_unavailable', {
+                    lead_saved: true,
+                    reason: 'payment_not_available_for_region',
+                    source: 'proceed_to_payment'
                 });
 
-                showExperimentSuccess();
+                showPaymentUnavailable();
             });
         });
     }
@@ -398,31 +439,7 @@
         placeOrderBtn.disabled = isSubmitting;
         placeOrderBtn.textContent = isSubmitting
             ? 'Saving your details...'
-            : 'Check Payment Availability';
-    }
-
-    function showExperimentSuccess() {
-        if (checkoutContent) checkoutContent.style.display = 'none';
-        if (checkoutSuccess) checkoutSuccess.style.display = 'block';
-
-        var heading = checkoutSuccess ? checkoutSuccess.querySelector('h2') : null;
-        if (heading) heading.textContent = 'Thanks — your interest has been recorded';
-
-        var orderLine = checkoutSuccess ? checkoutSuccess.querySelector('.success-order-number') : null;
-        if (orderLine) orderLine.style.display = 'none';
-        if (successOrderNumber) successOrderNumber.textContent = '';
-
-        var message = checkoutSuccess ? checkoutSuccess.querySelector('p:not(.success-order-number)') : null;
-        if (message) {
-            message.textContent = 'No payment was taken and no order was placed. We are currently setting up payment processing for your region. We will contact you using the details you provided if payment becomes available.';
-        }
-
-        var actions = checkoutSuccess ? checkoutSuccess.querySelector('.success-actions') : null;
-        if (actions) {
-            actions.innerHTML = '<a href="/products" class="btn btn-primary">Continue Shopping</a>';
-        }
-
-        if (checkoutSuccess) checkoutSuccess.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            : 'Proceed to Payment';
     }
 
     function init() {
