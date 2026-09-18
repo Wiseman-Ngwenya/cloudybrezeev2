@@ -38,6 +38,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
     const result = await productService.getAllProducts(options);
 
+    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+
     res.status(200).json(
         paginatedResponse(
             result.products,
@@ -59,6 +61,8 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 8;
 
     const products = await productService.getFeaturedProducts(limit);
+
+    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 
     res.status(200).json(
         successResponse(products)
