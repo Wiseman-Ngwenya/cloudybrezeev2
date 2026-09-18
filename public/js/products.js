@@ -198,6 +198,7 @@
 
                 // Render products
                 renderProducts(products);
+                initProductCardActions(products);
 
                 // Render pagination
                 renderPagination(paginationData);
@@ -235,11 +236,261 @@
                         '<span class="product-card-category">' + (product.category ? product.category.name : '') + '</span>' +
                         '<h3 class="product-card-title">' + product.name + '</h3>' +
                         '<div class="product-card-price">' +
-                            '<span class="product-price">$' + parseFloat(product.price).toFixed(2) + '</span>' +
+                            '<span class="product-price">
+        }).join('');
+    }
+
+    /**
+     * Render pagination buttons.
+     *
+     * @param {Object} paginationData - Pagination metadata from API
+     */
+    function trackCatalogExperiment(eventType, product, source) {
+        try {
+            if (!window.CloudyBreezeExperiment || typeof window.CloudyBreezeExperiment.track !== 'function') return;
+            window.CloudyBreezeExperiment.track(eventType, {
+                product_id: product && product.id ? String(product.id) : null,
+                page_path: window.location.pathname,
+                metadata: {
+                    product_slug: product && product.slug ? product.slug : null,
+                    price: Number((parseFloat(product && product.price) || 0).toFixed(2)),
+                    quantity: 1,
+                    source: source
+                }
+            });
+        } catch (err) {}
+    }
+
+    function initProductCardActions(products) {
+        if (!productsGrid) return;
+        var productsById = new Map(products.map(function (product) { return [String(product.id), product]; }));
+
+        productsGrid.querySelectorAll('[data-card-action]').forEach(function (button) {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                var product = productsById.get(String(this.getAttribute('data-product-id')));
+                if (!product || !window.CloudyBreeze || typeof window.CloudyBreeze.addToCart !== 'function') return;
+
+                var variant = product.variants && product.variants.length ? product.variants[0] : null;
+                var action = this.getAttribute('data-card-action');
+
+                if (action === 'add') {
+                    window.CloudyBreeze.addToCart(product, variant, 1);
+                    trackCatalogExperiment('add_to_cart', product, 'catalog_card');
+                    if (typeof window.CloudyBreeze.showToast === 'function') window.CloudyBreeze.showToast('Added to cart!', 'success');
+                    return;
+                }
+
+                if (action === 'buy') {
+                    trackCatalogExperiment('buy_now_click', product, 'catalog_card');
+                    window.CloudyBreeze.addToCart(product, variant, 1);
+                    window.location.href = '/checkout';
+                }
+            });
+        });
+    }
+
+    function renderPagination(paginationData) {
+        if (!pagination) return;
+
+        var page = paginationData.page || currentPage;
+        var pages = paginationData.pages || 1;
+
+        if (pages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+
+        var html = '';
+
+        // Previous button
+        html += '<button class="pagination-btn" ' + (page <= 1 ? 'disabled' : '') + ' data-page="' + (page - 1) + '" aria-label="Previous page">&laquo;</button>';
+
+        // Page numbers
+        var startPage = Math.max(1, page - 2);
+        var endPage = Math.min(pages, page + 2);
+
+        if (startPage > 1) {
+            html += '<button class="pagination-btn" data-page="1">1</button>';
+            if (startPage > 2) {
+                html += '<span class="pagination-btn" style="border:none;cursor:default;">...</span>';
+            }
+        }
+
+        for (var i = startPage; i <= endPage; i++) {
+            html += '<button class="pagination-btn' + (i === page ? ' active' : '') + '" data-page="' + i + '">' + i + '</button>';
+        }
+
+        if (endPage < pages) {
+            if (endPage < pages - 1) {
+                html += '<span class="pagination-btn" style="border:none;cursor:default;">...</span>';
+            }
+            html += '<button class="pagination-btn" data-page="' + pages + '">' + pages + '</button>';
+        }
+
+        // Next button
+        html += '<button class="pagination-btn" ' + (page >= pages ? 'disabled' : '') + ' data-page="' + (page + 1) + '" aria-label="Next page">&raquo;</button>';
+
+        pagination.innerHTML = html;
+
+        // Add click handlers
+        pagination.querySelectorAll('.pagination-btn[data-page]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var newPage = parseInt(this.getAttribute('data-page'));
+                if (newPage !== currentPage) {
+                    currentPage = newPage;
+                    updateUrlParams();
+                    loadProducts();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        });
+    }
+
+    // ============================================================
+    // UI State Management
+    // ============================================================
+
+    function showLoading() {
+        if (catalogLoading) catalogLoading.style.display = 'block';
+        if (productsGrid) productsGrid.innerHTML = '';
+        if (pagination) pagination.innerHTML = '';
+        hideEmpty();
+    }
+
+    function hideLoading() {
+        if (catalogLoading) catalogLoading.style.display = 'none';
+    }
+
+    function showEmpty(message) {
+        hideLoading();
+        if (catalogEmpty) catalogEmpty.style.display = 'block';
+        if (catalogEmptyMessage) catalogEmptyMessage.textContent = message || 'No products found.';
+        if (productsGrid) productsGrid.innerHTML = '';
+        if (pagination) pagination.innerHTML = '';
+    }
+
+    function hideEmpty() {
+        if (catalogEmpty) catalogEmpty.style.display = 'none';
+    }
+
+    function showError(message) {
+        showEmpty(message);
+    }
+
+    // ============================================================
+    // Event Handlers
+    // ============================================================
+
+    /**
+     * Handle search input with debounce.
+     */
+    function initSearch() {
+        if (!searchInput) return;
+
+        var debounceTimer;
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () {
+                currentSearch = searchInput.value.trim();
+                currentPage = 1;
+                updateUrlParams();
+                loadProducts();
+            }, 400);
+        });
+    }
+
+    /**
+     * Handle sort select change.
+     */
+    function initSort() {
+        if (!sortSelect) return;
+
+        sortSelect.addEventListener('change', function () {
+            var value = this.value;
+            var parts = value.split('-');
+            currentSort = parts[0] || 'created_at';
+            currentOrder = parts[1] || 'desc';
+            currentPage = 1;
+            updateUrlParams();
+            loadProducts();
+        });
+    }
+
+    /**
+     * Handle clear filters button.
+     */
+    function initClearFilters() {
+        if (!clearFiltersBtn) return;
+
+        clearFiltersBtn.addEventListener('click', function () {
+            currentCategory = '';
+            currentSearch = '';
+            currentSort = 'created_at';
+            currentOrder = 'desc';
+            currentPage = 1;
+
+            if (searchInput) searchInput.value = '';
+            if (sortSelect) sortSelect.value = 'created_at-desc';
+
+            updateUrlParams();
+            loadProducts();
+            updateActiveCategoryFilter();
+        });
+    }
+
+    /**
+     * Handle mobile filter toggle.
+     */
+    function initFilterToggle() {
+        if (!filterToggle || !filterPanel) return;
+
+        filterToggle.addEventListener('click', function () {
+            var isOpen = filterPanel.classList.toggle('open');
+            filterToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        // Close filters when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!filterPanel || !filterToggle) return;
+            if (!filterPanel.contains(e.target) && !filterToggle.contains(e.target)) {
+                filterPanel.classList.remove('open');
+                filterToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    // ============================================================
+    // Initialization
+    // ============================================================
+
+    function init() {
+        readUrlParams();
+        loadCategories();
+        loadProducts();
+        initSearch();
+        initSort();
+        initClearFilters();
+        initFilterToggle();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})(); + parseFloat(product.price).toFixed(2) + '</span>' +
                             comparePriceHtml +
                         '</div>' +
                     '</div>' +
                 '</a>' +
+                '<div class="product-card-actions">' +
+                    '<button type="button" class="product-card-action product-card-action-add" data-card-action="add" data-product-id="' + product.id + '">Add to Cart</button>' +
+                    '<button type="button" class="product-card-action product-card-action-buy" data-card-action="buy" data-product-id="' + product.id + '">Buy Now</button>' +
+                '</div>' +
             '</div>';
         }).join('');
     }
@@ -249,6 +500,53 @@
      *
      * @param {Object} paginationData - Pagination metadata from API
      */
+    function trackCatalogExperiment(eventType, product, source) {
+        try {
+            if (!window.CloudyBreezeExperiment || typeof window.CloudyBreezeExperiment.track !== 'function') return;
+            window.CloudyBreezeExperiment.track(eventType, {
+                product_id: product && product.id ? String(product.id) : null,
+                page_path: window.location.pathname,
+                metadata: {
+                    product_slug: product && product.slug ? product.slug : null,
+                    price: Number((parseFloat(product && product.price) || 0).toFixed(2)),
+                    quantity: 1,
+                    source: source
+                }
+            });
+        } catch (err) {}
+    }
+
+    function initProductCardActions(products) {
+        if (!productsGrid) return;
+        var productsById = new Map(products.map(function (product) { return [String(product.id), product]; }));
+
+        productsGrid.querySelectorAll('[data-card-action]').forEach(function (button) {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                var product = productsById.get(String(this.getAttribute('data-product-id')));
+                if (!product || !window.CloudyBreeze || typeof window.CloudyBreeze.addToCart !== 'function') return;
+
+                var variant = product.variants && product.variants.length ? product.variants[0] : null;
+                var action = this.getAttribute('data-card-action');
+
+                if (action === 'add') {
+                    window.CloudyBreeze.addToCart(product, variant, 1);
+                    trackCatalogExperiment('add_to_cart', product, 'catalog_card');
+                    if (typeof window.CloudyBreeze.showToast === 'function') window.CloudyBreeze.showToast('Added to cart!', 'success');
+                    return;
+                }
+
+                if (action === 'buy') {
+                    trackCatalogExperiment('buy_now_click', product, 'catalog_card');
+                    window.CloudyBreeze.addToCart(product, variant, 1);
+                    window.location.href = '/checkout';
+                }
+            });
+        });
+    }
+
     function renderPagination(paginationData) {
         if (!pagination) return;
 
