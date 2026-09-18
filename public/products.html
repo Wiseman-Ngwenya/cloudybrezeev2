@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/animations.css">
+    <style>
+        .product-card { display: flex; flex-direction: column; }
+        .product-card-link { flex: 1; }
+        .product-card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 16px; }
+        .product-card-action { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid transparent; font: inherit; font-weight: 700; cursor: pointer; }
+        .product-card-action-add { background: var(--color-primary); color: #fff; }
+        .product-card-action-buy { background: transparent; color: var(--color-primary); border-color: var(--color-primary); }
+        @media (max-width: 520px) { .product-card-actions { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
