@@ -20,6 +20,15 @@
         .experiment-step-value { display: block; margin-top: var(--spacing-xs); font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); }
         .experiment-step-note { display: block; margin-top: 4px; color: var(--color-text-light); font-size: var(--font-size-xs); }
         .experiment-refresh { display: flex; align-items: center; gap: var(--spacing-md); }
+        .experiment-funnel-analysis { margin-top: var(--spacing-xl); border-top: 1px solid var(--color-light-gray); padding-top: var(--spacing-xl); }
+        .experiment-analysis-title { margin: 0 0 var(--spacing-md); }
+        .experiment-analysis-subtitle { color: var(--color-text-light); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md); }
+        .experiment-funnel-table { width: 100%; border-collapse: collapse; }
+        .experiment-funnel-table th, .experiment-funnel-table td { padding: 10px 12px; border-bottom: 1px solid var(--color-light-gray); text-align: left; }
+        .experiment-funnel-table th { color: var(--color-text-light); font-size: 11px; text-transform: uppercase; }
+        .experiment-funnel-table td { font-size: 13px; }
+        .experiment-rate { font-weight: var(--font-weight-semibold); }
+        .experiment-dropoff { color: var(--color-text-light); }
         .experiment-session-row { cursor: pointer; }
         .experiment-session-row:hover { background: var(--color-off-white); }
         .experiment-session-id { font-family: monospace; font-size: 11px; color: var(--color-text-light); word-break: break-all; }
@@ -53,7 +62,7 @@
         .experiment-products { margin-top: var(--spacing-md); }
         .experiment-product-line { padding: 8px 0; border-bottom: 1px solid var(--color-light-gray); display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
         @media (max-width: 1100px) { .experiment-funnel { grid-template-columns: repeat(2, 1fr); } .experiment-detail-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 700px) { .experiment-funnel { grid-template-columns: 1fr; } .experiment-detail-grid, .experiment-lead-fields { grid-template-columns: 1fr; } .experiment-pagination { flex-direction: column; align-items: stretch; } .experiment-page-actions { justify-content: flex-end; } }
+        @media (max-width: 700px) { .experiment-funnel { grid-template-columns: 1fr; } .experiment-detail-grid, .experiment-lead-fields { grid-template-columns: 1fr; } .experiment-pagination { flex-direction: column; align-items: stretch; } .experiment-page-actions { justify-content: flex-end; } .experiment-funnel-table { min-width: 650px; } .experiment-funnel-scroll { overflow-x: auto; } }
     </style>
 </head>
 <body class="admin-body">
@@ -77,22 +86,31 @@
         <header class="admin-topbar"><div class="admin-topbar-left"><h1 class="admin-page-title">Interest Test</h1></div><div class="admin-topbar-right"><span class="admin-user-name" id="adminUserName">Admin</span></div></header>
         <main class="admin-content">
             <div class="experiment-intro"><h2>CloudyBreeze Demand Experiment</h2><p>See how visitors move from discovering a product to submitting checkout details. Open any session to inspect the visitor journey. No payment or real order is created by this experiment.</p></div>
-            <div class="admin-card"><div class="admin-card-header"><div><h2 class="admin-card-title">Purchase Intent Funnel</h2><span class="experiment-period">Funnel figures below cover the last 7 days.</span></div><div class="experiment-refresh"><span class="experiment-status" id="lastUpdated">Loading...</span><button class="btn btn-sm btn-outline" id="refreshBtn" type="button">Refresh</button></div></div><div class="admin-card-body"><div class="experiment-funnel">
-                <div class="experiment-step"><span class="experiment-step-label">Visitors</span><span class="experiment-step-value" id="metricVisitors">0</span><span class="experiment-step-note" id="metricVisitorsToday">0 today</span></div>
-                <div class="experiment-step"><span class="experiment-step-label">Product Views</span><span class="experiment-step-value" id="metricProductViews">0</span><span class="experiment-step-note" id="metricProductViewsToday">0 today</span></div>
-                <div class="experiment-step"><span class="experiment-step-label">Add to Cart</span><span class="experiment-step-value" id="metricAddToCart">0</span><span class="experiment-step-note">events</span></div>
-                <div class="experiment-step"><span class="experiment-step-label">Checkout Started</span><span class="experiment-step-value" id="metricCheckoutStarted">0</span><span class="experiment-step-note">events</span></div>
-                <div class="experiment-step"><span class="experiment-step-label">Form Started</span><span class="experiment-step-value" id="metricFormStarted">0</span><span class="experiment-step-note">events</span></div>
-                <div class="experiment-step"><span class="experiment-step-label">Form Completed</span><span class="experiment-step-value" id="metricFormCompleted">0</span><span class="experiment-step-note">details submitted</span></div>
-                <div class="experiment-step"><span class="experiment-step-label">Payment Attempts</span><span class="experiment-step-value" id="metricPaymentAttempts">0</span><span class="experiment-step-note">button submissions</span></div>
-                <div class="experiment-step"><span class="experiment-step-label">Payment Unavailable</span><span class="experiment-step-value" id="metricPaymentUnavailable">0</span><span class="experiment-step-note">experiment outcome</span></div>
-            </div></div></div>
+            <div class="admin-card">
+                <div class="admin-card-header"><div><h2 class="admin-card-title">Purchase Intent Funnel</h2><span class="experiment-period">Funnel figures below cover the last 7 days.</span></div><div class="experiment-refresh"><span class="experiment-status" id="lastUpdated">Loading...</span><button class="btn btn-sm btn-outline" id="refreshBtn" type="button">Refresh</button></div></div>
+                <div class="admin-card-body">
+                    <div class="experiment-funnel">
+                        <div class="experiment-step"><span class="experiment-step-label">Visitors</span><span class="experiment-step-value" id="metricVisitors">0</span><span class="experiment-step-note" id="metricVisitorsToday">0 today</span></div>
+                        <div class="experiment-step"><span class="experiment-step-label">Product Views</span><span class="experiment-step-value" id="metricProductViews">0</span><span class="experiment-step-note" id="metricProductViewsToday">0 today</span></div>
+                        <div class="experiment-step"><span class="experiment-step-label">Add to Cart</span><span class="experiment-step-value" id="metricAddToCart">0</span><span class="experiment-step-note">unique visitors</span></div>
+                        <div class="experiment-step"><span class="experiment-step-label">Checkout Started</span><span class="experiment-step-value" id="metricCheckoutStarted">0</span><span class="experiment-step-note">unique visitors</span></div>
+                        <div class="experiment-step"><span class="experiment-step-label">Form Started</span><span class="experiment-step-value" id="metricFormStarted">0</span><span class="experiment-step-note">unique visitors</span></div>
+                        <div class="experiment-step"><span class="experiment-step-label">Form Completed</span><span class="experiment-step-value" id="metricFormCompleted">0</span><span class="experiment-step-note">unique visitors</span></div>
+                        <div class="experiment-step"><span class="experiment-step-label">Payment Attempts</span><span class="experiment-step-value" id="metricPaymentAttempts">0</span><span class="experiment-step-note">unique visitors</span></div>
+                        <div class="experiment-step"><span class="experiment-step-label">Payment Unavailable</span><span class="experiment-step-value" id="metricPaymentUnavailable">0</span><span class="experiment-step-note">unique visitors</span></div>
+                    </div>
+                    <div class="experiment-funnel-analysis">
+                        <h3 class="experiment-analysis-title">Conversion & Drop-off</h3>
+                        <div class="experiment-analysis-subtitle">Each stage counts unique visitors. Conversion is measured from the previous stage and from all visitors.</div>
+                        <div class="experiment-funnel-scroll"><table class="experiment-funnel-table"><thead><tr><th>Stage</th><th>Visitors</th><th>From Previous</th><th>From All Visitors</th><th>Drop-off</th></tr></thead><tbody id="funnelAnalysisTable"><tr><td colspan="5" class="experiment-empty">Loading...</td></tr></tbody></table></div>
+                    </div>
+                </div>
+            </div>
             <div class="admin-card"><div class="admin-card-header"><div><h2 class="admin-card-title">Interested Customers</h2><span class="experiment-lead-count" id="leadCount">Loading...</span></div></div><div class="admin-card-body"><div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Location</th><th>Checkout Total</th><th>Date</th></tr></thead><tbody id="leadsTable"><tr><td colspan="5" class="admin-table-empty">Loading...</td></tr></tbody></table></div></div></div>
             <div class="admin-card"><div class="admin-card-header"><div><h2 class="admin-card-title">Visitor Sessions</h2><span class="experiment-lead-count" id="sessionCount">Loading...</span></div></div><div class="admin-card-body"><div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Visitor</th><th>Started</th><th>Journey Stage</th><th>Activity</th><th>Device</th><th></th></tr></thead><tbody id="sessionsTable"><tr><td colspan="6" class="admin-table-empty">Loading...</td></tr></tbody></table></div><div class="experiment-pagination"><span class="experiment-page-info" id="sessionPageInfo">—</span><div class="experiment-page-actions"><button class="btn btn-sm btn-outline" id="sessionPrev" type="button">Previous</button><button class="btn btn-sm btn-outline" id="sessionNext" type="button">Next</button></div></div></div></div>
         </main>
     </div>
     <div class="experiment-detail-backdrop" id="sessionModal" aria-hidden="true"><div class="experiment-detail" role="dialog" aria-modal="true" aria-labelledby="sessionModalTitle"><div class="experiment-detail-header"><div><h2 class="experiment-detail-title" id="sessionModalTitle">Visitor Journey</h2><div class="experiment-detail-subtitle" id="sessionModalSubtitle">Loading...</div></div><button class="btn btn-sm btn-outline" id="closeSessionModal" type="button">Close</button></div><div class="experiment-detail-body" id="sessionDetailBody"><div class="experiment-empty">Loading session...</div></div></div></div>
-
     <script src="js/admin.js"></script>
     <script>
         (function () {
@@ -123,12 +141,23 @@
                 var button = document.getElementById('refreshBtn'); if (button) { button.disabled = true; button.textContent = 'Loading...'; }
                 window.CloudyBreezeAdmin.apiGet('/api/analytics/admin/experiment').then(function (result) {
                     if (!result.success) throw new Error('Unable to load experiment data');
-                    var data = result.data || {}, funnel = data.funnel || {};
+                    var data = result.data || {}, funnel = data.funnel || {}, analysis = data.funnelAnalytics || {};
                     setText('metricVisitors', data.sessions && data.sessions.total); setText('metricVisitorsToday', (data.sessions && data.sessions.today || 0) + ' today');
                     setText('metricProductViews', data.productViews && data.productViews.total); setText('metricProductViewsToday', (data.productViews && data.productViews.today || 0) + ' today');
                     setText('metricAddToCart', funnel.addToCart); setText('metricCheckoutStarted', funnel.checkoutStarted); setText('metricFormStarted', funnel.checkoutFormStarted); setText('metricFormCompleted', funnel.checkoutFormCompleted); setText('metricPaymentAttempts', funnel.paymentAttempts); setText('metricPaymentUnavailable', funnel.paymentUnavailable);
+                    renderFunnelAnalysis(analysis.stages || []);
                     setText('leadCount', (funnel.leads || 0) + ' total leads · ' + (funnel.leadsToday || 0) + ' today'); renderLeads(data.recentLeads || []); setText('lastUpdated', 'Updated ' + new Date().toLocaleTimeString());
-                }).catch(function (error) { console.error(error); document.getElementById('leadsTable').innerHTML = '<tr><td colspan="5" class="admin-table-empty">Unable to load experiment data.</td></tr>'; setText('lastUpdated', 'Could not load data'); }).finally(function () { if (button) { button.disabled = false; button.textContent = 'Refresh'; } });
+                }).catch(function (error) { console.error(error); document.getElementById('leadsTable').innerHTML = '<tr><td colspan="5" class="admin-table-empty">Unable to load experiment data.</td></tr>'; document.getElementById('funnelAnalysisTable').innerHTML = '<tr><td colspan="5" class="experiment-empty">Unable to load funnel analysis.</td></tr>'; setText('lastUpdated', 'Could not load data'); }).finally(function () { if (button) { button.disabled = false; button.textContent = 'Refresh'; } });
+            }
+            function renderFunnelAnalysis(stages) {
+                var tbody = document.getElementById('funnelAnalysisTable');
+                if (!stages.length) { tbody.innerHTML = '<tr><td colspan="5" class="experiment-empty">No funnel activity yet.</td></tr>'; return; }
+                tbody.innerHTML = stages.map(function (stage) {
+                    var fromPrevious = stage.conversion_from_previous == null ? '—' : stage.conversion_from_previous.toFixed(1) + '%';
+                    var fromVisitors = Number(stage.conversion_from_visitors || 0).toFixed(1) + '%';
+                    var dropoff = stage.dropoff_from_previous == null ? '—' : stage.dropoff_from_previous + ' visitors';
+                    return '<tr><td><strong>' + escapeHtml(stage.label) + '</strong></td><td>' + escapeHtml(stage.count) + '</td><td class="experiment-rate">' + escapeHtml(fromPrevious) + '</td><td class="experiment-rate">' + escapeHtml(fromVisitors) + '</td><td class="experiment-dropoff">' + escapeHtml(dropoff) + '</td></tr>';
+                }).join('');
             }
             function loadSessions() {
                 document.getElementById('sessionsTable').innerHTML = '<tr><td colspan="6" class="admin-table-empty">Loading sessions...</td></tr>';
@@ -160,7 +189,7 @@
                 var session = data.session || {}, events = data.events || [], leads = data.leads || [], body = document.getElementById('sessionDetailBody');
                 document.getElementById('sessionModalSubtitle').textContent = session.session_id || 'Unknown session';
                 var eventHtml = events.length ? events.map(function (event) { var metadata = event.metadata && typeof event.metadata === 'object' ? event.metadata : {}, metadataText = JSON.stringify(metadata, null, 2); return '<div class="experiment-event"><div class="experiment-event-title">' + escapeHtml(prettyEventType(event.event_type)) + '</div><div class="experiment-event-time">' + escapeHtml(formatDate(event.created_at)) + '</div>' + (event.page_path ? '<div class="experiment-event-path">Page: ' + escapeHtml(event.page_path) + '</div>' : '') + (metadataText !== '{}' ? '<div class="experiment-event-meta">' + escapeHtml(metadataText) + '</div>' : '') + '</div>'; }).join('') : '<div class="experiment-empty">No experiment events recorded for this session.</div>';
-                var leadHtml = leads.length ? leads.map(function (lead) { var products = Array.isArray(lead.product_summary) ? lead.product_summary : [], productHtml = products.length ? products.map(function (product) { return '<div class="experiment-product-line"><span>' + escapeHtml(product.name || 'Product') + ' × ' + escapeHtml(product.quantity || 0) + '</span><strong>' + escapeHtml(formatMoney(product.line_total, lead.currency)) + '</strong></div>'; }).join('') : '<div class="experiment-empty">No product summary.</div>'; return '<div class="experiment-lead-detail"><h3>Submitted Checkout Details</h3><div class="experiment-lead-fields">' + leadField('Name', lead.full_name) + leadField('Email', lead.email) + leadField('Phone', lead.phone) + leadField('Country', [lead.country_name, lead.country_code].filter(Boolean).join(' · ')) + leadField('City', lead.city) + leadField('Postal Code', lead.postal_code) + leadField('Address', lead.address) + leadField('Submitted', formatDate(lead.created_at)) + leadField('Subtotal', formatMoney(lead.checkout_subtotal, lead.currency)) + leadField('Shipping', formatMoney(lead.checkout_shipping, lead.currency)) + leadField('Total', formatMoney(lead.checkout_total, lead.currency)) + '</div><div class="experiment-products"><strong>Cart at submission</strong>' + productHtml + '</div></div>'; }).join('') : '';
+                var leadHtml = leads.length ? leads.map(function (lead) { var products = Array.isArray(lead.product_summary) ? lead.product_summary : [], productHtml = products.length ? products.map(function (product) { return '<div class="experiment-product-line"><span>' + escapeHtml(product.product_name || product.name || 'Product') + ' × ' + escapeHtml(product.quantity || 0) + '</span><strong>' + escapeHtml(formatMoney(product.line_total, lead.currency)) + '</strong></div>'; }).join('') : '<div class="experiment-empty">No product summary.</div>'; return '<div class="experiment-lead-detail"><h3>Submitted Checkout Details</h3><div class="experiment-lead-fields">' + leadField('Name', lead.full_name) + leadField('Email', lead.email) + leadField('Phone', lead.phone) + leadField('Country', [lead.country_name, lead.country_code].filter(Boolean).join(' · ')) + leadField('City', lead.city) + leadField('Postal Code', lead.postal_code) + leadField('Address', lead.address) + leadField('Submitted', formatDate(lead.created_at)) + leadField('Subtotal', formatMoney(lead.checkout_subtotal, lead.currency)) + leadField('Shipping', formatMoney(lead.checkout_shipping, lead.currency)) + leadField('Total', formatMoney(lead.checkout_total, lead.currency)) + '</div><div class="experiment-products"><strong>Cart at submission</strong>' + productHtml + '</div></div>'; }).join('') : '';
                 body.innerHTML = '<div class="experiment-detail-grid">' + detailCard('Journey stage', data.journey_stage || 'Visited store') + detailCard('First seen', formatDate(session.first_seen_at)) + detailCard('Last activity', events.length ? formatDate(events[events.length - 1].created_at) : formatDate(session.first_seen_at)) + detailCard('Device', session.device_type || 'Unknown') + detailCard('Browser', session.browser || 'Unknown') + detailCard('OS', session.os || 'Unknown') + detailCard('Language', session.language || 'Unknown') + detailCard('Timezone', session.timezone || 'Unknown') + detailCard('Screen', session.screen_width && session.screen_height ? session.screen_width + ' × ' + session.screen_height : 'Unknown') + '</div><h3>Journey Timeline</h3><div class="experiment-timeline">' + eventHtml + '</div>' + leadHtml;
             }
             function renderLeads(leads) {
