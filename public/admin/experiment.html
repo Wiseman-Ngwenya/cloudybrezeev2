@@ -106,6 +106,8 @@
                     </div>
                 </div>
             </div>
+            <div class="admin-card"><div class="admin-card-header"><div><h2 class="admin-card-title">Traffic Sources</h2><span class="experiment-lead-count">Last 7 days · unique visitors</span></div></div><div class="admin-card-body"><div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Source</th><th>Visitors</th><th>Product Views</th><th>Add to Cart</th><th>Checkout</th><th>Details Submitted</th><th>Intent Rate</th></tr></thead><tbody id="trafficSourcesTable"><tr><td colspan="7" class="admin-table-empty">Loading...</td></tr></tbody></table></div></div></div>
+            <div class="admin-card"><div class="admin-card-header"><div><h2 class="admin-card-title">Countries of Interested Customers</h2><span class="experiment-lead-count">Last 7 days · based on submitted checkout details</span></div></div><div class="admin-card-body"><div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Country</th><th>Details Submitted</th><th>Payment Attempts</th><th>Payment Unavailable</th></tr></thead><tbody id="countriesTable"><tr><td colspan="4" class="admin-table-empty">Loading...</td></tr></tbody></table></div></div></div>
             <div class="admin-card"><div class="admin-card-header"><div><h2 class="admin-card-title">Interested Customers</h2><span class="experiment-lead-count" id="leadCount">Loading...</span></div></div><div class="admin-card-body"><div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Location</th><th>Checkout Total</th><th>Date</th></tr></thead><tbody id="leadsTable"><tr><td colspan="5" class="admin-table-empty">Loading...</td></tr></tbody></table></div></div></div>
             <div class="admin-card"><div class="admin-card-header"><div><h2 class="admin-card-title">Visitor Sessions</h2><span class="experiment-lead-count" id="sessionCount">Loading...</span></div></div><div class="admin-card-body"><div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Visitor</th><th>Started</th><th>Journey Stage</th><th>Activity</th><th>Device</th><th></th></tr></thead><tbody id="sessionsTable"><tr><td colspan="6" class="admin-table-empty">Loading...</td></tr></tbody></table></div><div class="experiment-pagination"><span class="experiment-page-info" id="sessionPageInfo">—</span><div class="experiment-page-actions"><button class="btn btn-sm btn-outline" id="sessionPrev" type="button">Previous</button><button class="btn btn-sm btn-outline" id="sessionNext" type="button">Next</button></div></div></div></div>
         </main>
@@ -145,7 +147,7 @@
                     setText('metricVisitors', data.sessions && data.sessions.total); setText('metricVisitorsToday', (data.sessions && data.sessions.today || 0) + ' today');
                     setText('metricProductViews', data.productViews && data.productViews.total); setText('metricProductViewsToday', (data.productViews && data.productViews.today || 0) + ' today');
                     setText('metricAddToCart', funnel.addToCart); setText('metricCheckoutStarted', funnel.checkoutStarted); setText('metricFormStarted', funnel.checkoutFormStarted); setText('metricFormCompleted', funnel.checkoutFormCompleted); setText('metricPaymentAttempts', funnel.paymentAttempts); setText('metricPaymentUnavailable', funnel.paymentUnavailable);
-                    renderFunnelAnalysis(analysis.stages || []);
+                    renderFunnelAnalysis(analysis.stages || []); renderTrafficSources(data.trafficSources || []); renderCountries(data.countries || []);
                     setText('leadCount', (funnel.leads || 0) + ' total leads · ' + (funnel.leadsToday || 0) + ' today'); renderLeads(data.recentLeads || []); setText('lastUpdated', 'Updated ' + new Date().toLocaleTimeString());
                 }).catch(function (error) { console.error(error); document.getElementById('leadsTable').innerHTML = '<tr><td colspan="5" class="admin-table-empty">Unable to load experiment data.</td></tr>'; document.getElementById('funnelAnalysisTable').innerHTML = '<tr><td colspan="5" class="experiment-empty">Unable to load funnel analysis.</td></tr>'; setText('lastUpdated', 'Could not load data'); }).finally(function () { if (button) { button.disabled = false; button.textContent = 'Refresh'; } });
             }
@@ -157,6 +159,20 @@
                     var fromVisitors = Number(stage.conversion_from_visitors || 0).toFixed(1) + '%';
                     var dropoff = stage.dropoff_from_previous == null ? '—' : stage.dropoff_from_previous + ' visitors';
                     return '<tr><td><strong>' + escapeHtml(stage.label) + '</strong></td><td>' + escapeHtml(stage.count) + '</td><td class="experiment-rate">' + escapeHtml(fromPrevious) + '</td><td class="experiment-rate">' + escapeHtml(fromVisitors) + '</td><td class="experiment-dropoff">' + escapeHtml(dropoff) + '</td></tr>';
+                }).join('');
+            }
+            function renderTrafficSources(rows) {
+                var tbody = document.getElementById('trafficSourcesTable');
+                if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="admin-table-empty">No traffic-source data yet.</td></tr>'; return; }
+                tbody.innerHTML = rows.map(function (row) {
+                    return '<tr><td><strong>' + escapeHtml(row.source) + '</strong>' + (row.medium ? '<div class="experiment-session-id">' + escapeHtml(row.medium) + '</div>' : '') + '</td><td>' + row.visitors + '</td><td>' + row.product_views + '</td><td>' + row.add_to_cart + '</td><td>' + row.checkout_started + '</td><td>' + row.form_completed + '</td><td class="experiment-rate">' + Number(row.intent_rate || 0).toFixed(1) + '%</td></tr>';
+                }).join('');
+            }
+            function renderCountries(rows) {
+                var tbody = document.getElementById('countriesTable');
+                if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="admin-table-empty">No checkout countries recorded yet.</td></tr>'; return; }
+                tbody.innerHTML = rows.map(function (row) {
+                    return '<tr><td><strong>' + escapeHtml(row.country) + '</strong></td><td>' + row.details_submitted + '</td><td>' + row.payment_attempts + '</td><td>' + row.payment_unavailable + '</td></tr>';
                 }).join('');
             }
             function loadSessions() {
