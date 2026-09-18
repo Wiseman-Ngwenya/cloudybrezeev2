@@ -92,6 +92,86 @@ async function getRecentLeads(limit = 10) {
     return data || [];
 }
 
+async function getUniqueEventSessions(eventType, since) {
+    const pageSize = 1000;
+    const sessionIds = new Set();
+    let from = 0;
+
+    while (true) {
+        let query = serviceClient
+            .from('experiment_events')
+            .select('session_id')
+            .eq('event_type', eventType)
+            .not('session_id', 'is', null)
+            .order('created_at', { ascending: true })
+            .range(from, from + pageSize - 1);
+
+        if (since) query = query.gte('created_at', since);
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        const rows = data || [];
+        rows.forEach((row) => {
+            if (row.session_id) sessionIds.add(row.session_id);
+        });
+
+        if (rows.length < pageSize) break;
+        from += pageSize;
+    }
+
+    return sessionIds;
+}
+
+function percent(value, total) {
+    if (!total) return 0;
+    return Number(((value / total) * 100).toFixed(1));
+}
+
+async function getFunnelAnalytics(since) {
+    const stageDefinitions = [
+        { key: 'visitors', label: 'Visitors', source: 'sessions' },
+        { key: 'productViews', label: 'Product Views', eventType: 'product_view' },
+        { key: 'addToCart', label: 'Add to Cart', eventType: 'add_to_cart' },
+        { key: 'checkoutStarted', label: 'Checkout Started', eventType: 'checkout_started' },
+        { key: 'checkoutFormStarted', label: 'Form Started', eventType: 'checkout_form_started' },
+        { key: 'checkoutFormCompleted', label: 'Form Completed', eventType: 'checkout_form_completed' },
+        { key: 'paymentAttempts', label: 'Payment Attempts', eventType: 'payment_attempt' },
+        { key: 'paymentUnavailable', label: 'Payment Unavailable', eventType: 'payment_unavailable' },
+    ];
+
+    const [visitorCount, ...eventSessionSets] = await Promise.all([
+        countSessions(since),
+        ...stageDefinitions.slice(1).map((stage) => getUniqueEventSessions(stage.eventType, since)),
+    ]);
+
+    const counts = { visitors: visitorCount };
+    stageDefinitions.slice(1).forEach((stage, index) => {
+        counts[stage.key] = eventSessionSets[index].size;
+    });
+
+    const stages = stageDefinitions.map((stage, index) => {
+        const count = counts[stage.key];
+        const previous = index > 0 ? counts[stageDefinitions[index - 1].key] : null;
+        const conversionFromPrevious = previous === null ? null : percent(count, previous);
+        const dropoffFromPrevious = previous === null ? null : Math.max(previous - count, 0);
+
+        return {
+            key: stage.key,
+            label: stage.label,
+            count,
+            conversion_from_previous: conversionFromPrevious,
+            dropoff_from_previous: dropoffFromPrevious,
+            conversion_from_visitors: percent(count, visitorCount),
+        };
+    });
+
+    return {
+        period_start: since,
+        stages,
+    };
+}
+
 async function getRecentSessions({ limit = 50, offset = 0 } = {}) {
     const safeLimit = normalizeLimit(limit, 50, 100);
     const safeOffset = normalizeOffset(offset);
@@ -213,6 +293,7 @@ async function getOverview() {
         leadsTotal,
         leadsToday,
         recentLeads,
+        funnelAnalytics,
     ] = await Promise.all([
         countSessions(),
         countSessions(today),
@@ -227,6 +308,7 @@ async function getOverview() {
         countLeads(),
         countLeads(today),
         getRecentLeads(),
+        getFunnelAnalytics(sevenDaysAgo),
     ]);
 
     return {
@@ -252,6 +334,7 @@ async function getOverview() {
             leads: leadsTotal,
             leadsToday,
         },
+        funnelAnalytics,
         recentLeads,
     };
 }
