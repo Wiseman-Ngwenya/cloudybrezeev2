@@ -7,6 +7,16 @@
 
 const { serviceClient } = require('../config/supabase');
 
+const FUNNEL_EVENT_TYPES = [
+    'product_view',
+    'add_to_cart',
+    'checkout_started',
+    'checkout_form_started',
+    'checkout_form_completed',
+    'payment_attempt',
+    'payment_unavailable',
+];
+
 function startOfDayIso() {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -172,6 +182,228 @@ async function getFunnelAnalytics(since) {
     };
 }
 
+function sourceFromSession(session) {
+    const utmSource = String(session.utm_source || '').trim();
+    if (utmSource) return utmSource;
+
+    const referrer = String(session.referrer || '').trim();
+    if (!referrer) return 'Direct';
+
+    try {
+        const url = new URL(referrer);
+        const hostname = url.hostname.replace(/^www\./i, '');
+        return hostname || 'Referral';
+    } catch (_) {
+        return referrer.slice(0, 100);
+    }
+}
+
+function sourceKey(source) {
+    return String(source || 'Direct').trim().toLowerCase();
+}
+
+function displaySource(source) {
+    const normalized = String(source || 'Direct').trim();
+    if (normalized.toLowerCase() === 'direct') return 'Direct';
+    return normalized;
+}
+
+async function getTrafficSourceAnalytics(since) {
+    const pageSize = 1000;
+    const sessions = [];
+    let from = 0;
+
+    while (true) {
+        const { data, error } = await serviceClient
+            .from('experiment_sessions')
+            .select('session_id, utm_source, utm_medium, referrer, created_at')
+            .gte('created_at', since)
+            .order('created_at', { ascending: true })
+            .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+
+        const rows = data || [];
+        sessions.push(...rows);
+
+        if (rows.length < pageSize) break;
+        from += pageSize;
+    }
+
+    if (!sessions.length) return [];
+
+    const sessionById = new Map();
+    const groups = new Map();
+
+    sessions.forEach((session) => {
+        sessionById.set(session.session_id, session);
+
+        const source = sourceFromSession(session);
+        const key = sourceKey(source);
+
+        if (!groups.has(key)) {
+            groups.set(key, {
+                source: displaySource(source),
+                medium: session.utm_medium || null,
+                visitors: 0,
+                productViews: new Set(),
+                addToCart: new Set(),
+                checkoutStarted: new Set(),
+                checkoutFormStarted: new Set(),
+                checkoutFormCompleted: new Set(),
+                paymentAttempts: new Set(),
+                paymentUnavailable: new Set(),
+            });
+        }
+
+        groups.get(key).visitors += 1;
+    });
+
+    let eventFrom = 0;
+    while (true) {
+        const { data, error } = await serviceClient
+            .from('experiment_events')
+            .select('session_id, event_type, created_at')
+            .gte('created_at', since)
+            .in('event_type', FUNNEL_EVENT_TYPES)
+            .not('session_id', 'is', null)
+            .order('created_at', { ascending: true })
+            .range(eventFrom, eventFrom + pageSize - 1);
+
+        if (error) throw error;
+
+        const rows = data || [];
+        rows.forEach((event) => {
+            const session = sessionById.get(event.session_id);
+            if (!session) return;
+
+            const group = groups.get(sourceKey(sourceFromSession(session)));
+            if (!group || !group[event.event_type === 'product_view' ? 'productViews'
+                : event.event_type === 'add_to_cart' ? 'addToCart'
+                : event.event_type === 'checkout_started' ? 'checkoutStarted'
+                : event.event_type === 'checkout_form_started' ? 'checkoutFormStarted'
+                : event.event_type === 'checkout_form_completed' ? 'checkoutFormCompleted'
+                : event.event_type === 'payment_attempt' ? 'paymentAttempts'
+                : 'paymentUnavailable']) return;
+
+            const field = event.event_type === 'product_view' ? 'productViews'
+                : event.event_type === 'add_to_cart' ? 'addToCart'
+                : event.event_type === 'checkout_started' ? 'checkoutStarted'
+                : event.event_type === 'checkout_form_started' ? 'checkoutFormStarted'
+                : event.event_type === 'checkout_form_completed' ? 'checkoutFormCompleted'
+                : event.event_type === 'payment_attempt' ? 'paymentAttempts'
+                : 'paymentUnavailable';
+
+            group[field].add(event.session_id);
+        });
+
+        if (rows.length < pageSize) break;
+        eventFrom += pageSize;
+    }
+
+    return Array.from(groups.values())
+        .sort((a, b) => b.visitors - a.visitors)
+        .map((group) => ({
+            source: group.source,
+            medium: group.medium,
+            visitors: group.visitors,
+            product_views: group.productViews.size,
+            add_to_cart: group.addToCart.size,
+            checkout_started: group.checkoutStarted.size,
+            form_started: group.checkoutFormStarted.size,
+            form_completed: group.checkoutFormCompleted.size,
+            payment_attempts: group.paymentAttempts.size,
+            payment_unavailable: group.paymentUnavailable.size,
+            intent_rate: percent(group.checkoutFormCompleted.size, group.visitors),
+        }));
+}
+
+async function getCountryAnalytics(since) {
+    const pageSize = 1000;
+    const leads = [];
+    let from = 0;
+
+    while (true) {
+        const { data, error } = await serviceClient
+            .from('experiment_leads')
+            .select('id, session_id, country_name, created_at')
+            .gte('created_at', since)
+            .order('created_at', { ascending: true })
+            .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+
+        const rows = data || [];
+        leads.push(...rows);
+
+        if (rows.length < pageSize) break;
+        from += pageSize;
+    }
+
+    if (!leads.length) return [];
+
+    const sessionIds = Array.from(new Set(leads.map((lead) => lead.session_id).filter(Boolean)));
+    const eventsBySession = new Map();
+
+    let eventFrom = 0;
+    while (sessionIds.length && true) {
+        const chunk = sessionIds.slice(eventFrom * 500, eventFrom * 500 + 500);
+        if (!chunk.length) break;
+
+        const { data, error } = await serviceClient
+            .from('experiment_events')
+            .select('session_id, event_type')
+            .in('session_id', chunk)
+            .gte('created_at', since)
+            .in('event_type', ['checkout_form_completed', 'payment_attempt', 'payment_unavailable']);
+
+        if (error) throw error;
+
+        (data || []).forEach((event) => {
+            const set = eventsBySession.get(event.session_id) || new Set();
+            set.add(event.event_type);
+            eventsBySession.set(event.session_id, set);
+        });
+
+        eventFrom += 1;
+    }
+
+    const groups = new Map();
+
+    leads.forEach((lead) => {
+        const country = String(lead.country_name || 'Unknown').trim() || 'Unknown';
+        const key = country.toLowerCase();
+
+        if (!groups.has(key)) {
+            groups.set(key, {
+                country,
+                leads: new Set(),
+                formCompleted: new Set(),
+                paymentAttempts: new Set(),
+                paymentUnavailable: new Set(),
+            });
+        }
+
+        const group = groups.get(key);
+        const identity = lead.session_id || lead.id;
+        group.leads.add(identity);
+
+        const eventTypes = eventsBySession.get(lead.session_id) || new Set();
+        if (eventTypes.has('checkout_form_completed')) group.formCompleted.add(identity);
+        if (eventTypes.has('payment_attempt')) group.paymentAttempts.add(identity);
+        if (eventTypes.has('payment_unavailable')) group.paymentUnavailable.add(identity);
+    });
+
+    return Array.from(groups.values())
+        .sort((a, b) => b.leads.size - a.leads.size)
+        .map((group) => ({
+            country: group.country,
+            details_submitted: group.formCompleted.size || group.leads.size,
+            payment_attempts: group.paymentAttempts.size,
+            payment_unavailable: group.paymentUnavailable.size,
+        }));
+}
+
 async function getRecentSessions({ limit = 50, offset = 0 } = {}) {
     const safeLimit = normalizeLimit(limit, 50, 100);
     const safeOffset = normalizeOffset(offset);
@@ -294,6 +526,8 @@ async function getOverview() {
         leadsToday,
         recentLeads,
         funnelAnalytics,
+        trafficSources,
+        countries,
     ] = await Promise.all([
         countSessions(),
         countSessions(today),
@@ -309,6 +543,8 @@ async function getOverview() {
         countLeads(today),
         getRecentLeads(),
         getFunnelAnalytics(sevenDaysAgo),
+        getTrafficSourceAnalytics(sevenDaysAgo),
+        getCountryAnalytics(sevenDaysAgo),
     ]);
 
     return {
@@ -335,6 +571,8 @@ async function getOverview() {
             leadsToday,
         },
         funnelAnalytics,
+        trafficSources,
+        countries,
         recentLeads,
     };
 }
