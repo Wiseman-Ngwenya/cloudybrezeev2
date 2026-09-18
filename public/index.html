@@ -316,6 +316,10 @@
 
                 loading.style.display = 'none';
                 const products = result.data;
+                window.CloudyBreezeCardProducts = window.CloudyBreezeCardProducts || {};
+                products.forEach(product => {
+                    window.CloudyBreezeCardProducts[String(product.id)] = product;
+                });
 
                 container.innerHTML = products.map(product => {
                     const coverImage = product.cover_image || (product.images && product.images.length > 0 ? product.images[0].image_url : '');
