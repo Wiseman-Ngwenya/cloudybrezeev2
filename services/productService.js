@@ -53,13 +53,10 @@ async function getAllProducts(options = {}) {
         .select(
             `
             id,
-            category_id,
             name,
             slug,
-            short_description,
             price,
             compare_price,
-            featured,
             cover_image,
             category:categories(id, name, slug)
         `,
