@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="preconnect" href="https://xtcumrmayetcihqmtqkx.supabase.co" crossorigin>
     <style>
         .product-card { display: flex; flex-direction: column; }
         .product-card-link { flex: 1; }
@@ -320,7 +321,7 @@
                     window.CloudyBreezeCardProducts[String(product.id)] = product;
                 });
 
-                container.innerHTML = products.map(product => {
+                container.innerHTML = products.map((product, productIndex) => {
                     const coverImage = product.cover_image || (product.images && product.images.length > 0 ? product.images[0].image_url : '');
                     const comparePrice = product.compare_price ? `<span class="product-compare-price">$${parseFloat(product.compare_price).toFixed(2)}</span>` : '';
                     
