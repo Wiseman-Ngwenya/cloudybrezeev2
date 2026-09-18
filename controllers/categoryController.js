@@ -28,6 +28,8 @@ const { asyncHandler } = require('../middleware/errorHandler');
 const getAllCategories = asyncHandler(async (req, res) => {
     const categories = await categoryService.getAllCategories();
 
+    res.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+
     res.status(200).json(
         successResponse(categories)
     );
