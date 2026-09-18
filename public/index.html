@@ -9,6 +9,17 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/animations.css">
+    <style>
+        .product-card { display: flex; flex-direction: column; }
+        .product-card-link { flex: 1; }
+        .product-card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 16px; }
+        .product-card-action { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid transparent; font: inherit; font-weight: 700; cursor: pointer; transition: transform .15s ease, opacity .15s ease; }
+        .product-card-action:hover { transform: translateY(-1px); }
+        .product-card-action:disabled { opacity: .6; cursor: wait; transform: none; }
+        .product-card-action-add { background: var(--color-primary); color: #fff; }
+        .product-card-action-buy { background: transparent; color: var(--color-primary); border-color: var(--color-primary); }
+        @media (max-width: 520px) { .product-card-actions { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
@@ -277,6 +288,7 @@
     <!-- ============================================================ -->
     <script src="js/analytics.js"></script>
     <script src="js/site.js"></script>
+    <script src="js/product-card-actions.js"></script>
     <script>
         // Initialize homepage
         document.addEventListener('DOMContentLoaded', () => {
@@ -324,6 +336,10 @@
                                     </div>
                                 </div>
                             </a>
+                            <div class="product-card-actions">
+                                <button type="button" class="product-card-action product-card-action-add" data-card-action="add" data-product-id="${product.id}">Add to Cart</button>
+                                <button type="button" class="product-card-action product-card-action-buy" data-card-action="buy" data-product-id="${product.id}">Buy Now</button>
+                            </div>
                         </div>
                     `;
                 }).join('');
