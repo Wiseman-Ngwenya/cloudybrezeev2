@@ -52,10 +52,16 @@ async function getAllProducts(options = {}) {
         .from('products')
         .select(
             `
-            *,
-            category:categories(id, name, slug),
-            images:product_images(image_url, is_primary, sort_order),
-            variants:product_variants(id, variation_name, sku, price_adjustment, image_url, active)
+            id,
+            category_id,
+            name,
+            slug,
+            short_description,
+            price,
+            compare_price,
+            featured,
+            cover_image,
+            category:categories(id, name, slug)
         `,
             { count: 'exact' }
         )
@@ -134,9 +140,16 @@ async function getFeaturedProducts(limit = 8) {
         .from('products')
         .select(
             `
-            *,
-            category:categories(id, name, slug),
-            images:product_images(image_url, is_primary, sort_order)
+            id,
+            category_id,
+            name,
+            slug,
+            short_description,
+            price,
+            compare_price,
+            featured,
+            cover_image,
+            category:categories(id, name, slug)
         `
         )
         .eq('active', true)
