@@ -108,6 +108,30 @@
         font-size: var(--font-size-base);
     }
 
+    /* Mobile navigation: keep the menu button visible and above the dropdown */
+    .main-nav {
+        position: static;
+    }
+
+    .nav-toggle {
+        display: flex !important;
+        position: relative;
+        z-index: 110;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .nav-toggle span {
+        flex-shrink: 0;
+    }
+
+    .nav-list {
+        z-index: 105;
+    }
+
     /* Hero Section */
     .hero-section {
         height: 480px;
