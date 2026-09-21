@@ -316,7 +316,15 @@
                         btn.disabled = false;
                         btn.textContent = 'Save Product';
                         if (!result.success) {
-                            showMessage(result.error ? result.error.message : 'Failed to save product.', 'error');
+                            var errorMessage = result.error ? result.error.message : 'Failed to save product.';
+                            if (result.error && Array.isArray(result.error.details) && result.error.details.length > 0) {
+                                var detailText = result.error.details.map(function (detail) {
+                                    return (detail.field ? detail.field + ': ' : '') + detail.message;
+                                }).join(' | ');
+                                errorMessage += ' ' + detailText;
+                                console.error('Product validation details:', result.error.details);
+                            }
+                            showMessage(errorMessage, 'error');
                             return;
                         }
                         var saved = result.data;
