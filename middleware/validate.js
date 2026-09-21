@@ -110,6 +110,7 @@ const productValidationRules = [
         .trim(),
 
     body('price')
+        .customSanitizer((value) => (value === null || value === undefined ? value : String(value)))
         .isDecimal({ decimal_digits: '0,2' })
         .withMessage('Price must be a valid decimal number')
         .isFloat({ min: 0 })
@@ -118,6 +119,7 @@ const productValidationRules = [
 
     body('compare_price')
         .optional({ checkFalsy: true })
+        .customSanitizer((value) => (value === null || value === undefined ? value : String(value)))
         .isDecimal({ decimal_digits: '0,2' })
         .withMessage('Compare price must be a valid decimal number')
         .isFloat({ min: 0 })
@@ -126,12 +128,14 @@ const productValidationRules = [
 
     body('featured')
         .optional()
+        .customSanitizer((value) => String(value))
         .isBoolean()
         .withMessage('Featured must be a boolean value')
         .toBoolean(),
 
     body('active')
         .optional()
+        .customSanitizer((value) => String(value))
         .isBoolean()
         .withMessage('Active must be a boolean value')
         .toBoolean(),
