@@ -2373,3 +2373,77 @@ p:last-child {
 .faq-teaser-content {
     text-align: center;
 }
+
+/* ============================================================
+   Mobile Navigation Fallback
+   Keep this in the main stylesheet as well as responsive.css
+   so the hamburger remains available even if responsive rules
+   are cached or loaded out of order.
+   ============================================================ */
+@media screen and (max-width: 768px) {
+    .site-header .header-container {
+        position: relative;
+    }
+
+    .site-header .main-nav {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        position: static;
+    }
+
+    .site-header .nav-toggle {
+        display: flex !important;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative;
+        z-index: 1001;
+        flex-shrink: 0;
+        padding: 8px;
+    }
+
+    .site-header .nav-toggle span {
+        display: block !important;
+        width: 24px;
+        height: 2px;
+        min-height: 2px;
+        background-color: var(--color-text) !important;
+        visibility: visible !important;
+        opacity: 1;
+    }
+
+    .site-header .nav-list {
+        display: none;
+        position: absolute;
+        top: var(--header-height);
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 1000;
+        flex-direction: column;
+        align-items: stretch;
+        background-color: var(--color-white);
+        border-bottom: 1px solid var(--color-light-gray);
+        box-shadow: var(--shadow-lg);
+        padding: var(--spacing-md);
+        margin: 0;
+        gap: 0;
+    }
+
+    .site-header .nav-list.open {
+        display: flex !important;
+    }
+
+    .site-header .nav-list .nav-link {
+        display: block !important;
+        width: 100%;
+        padding: var(--spacing-md);
+    }
+}
