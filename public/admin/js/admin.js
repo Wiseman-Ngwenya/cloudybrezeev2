@@ -132,6 +132,56 @@
     }
 
     // ============================================================
+    // Mobile Sidebar Toggle
+    // ============================================================
+
+    function initMobileSidebarToggle() {
+        var sidebar = document.getElementById('adminSidebar');
+        var topbarLeft = document.querySelector('.admin-topbar-left');
+        if (!sidebar || !topbarLeft || document.getElementById('mobileSidebarToggle')) return;
+
+        var button = document.createElement('button');
+        button.id = 'mobileSidebarToggle';
+        button.className = 'admin-mobile-menu-toggle';
+        button.type = 'button';
+        button.setAttribute('aria-label', 'Open navigation menu');
+        button.setAttribute('aria-expanded', 'false');
+        button.innerHTML = '<span></span><span></span><span></span>';
+
+        button.style.cssText =
+            'display:none;align-items:center;justify-content:center;flex-direction:column;' +
+            'gap:5px;width:40px;height:40px;padding:8px;margin-right:10px;' +
+            'background:transparent;border:1px solid var(--color-light-gray);border-radius:8px;' +
+            'cursor:pointer;flex-shrink:0;z-index:1001;';
+
+        button.querySelectorAll('span').forEach(function (span) {
+            span.style.cssText =
+                'display:block;width:22px;height:2px;background:var(--color-text);' +
+                'border-radius:2px;transition:transform .2s ease,opacity .2s ease;';
+        });
+
+        function updateVisibility() {
+            button.style.display = window.matchMedia('(max-width: 768px)').matches ? 'flex' : 'none';
+        }
+
+        button.addEventListener('click', function () {
+            var isOpen = sidebar.classList.toggle('open');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            button.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+        });
+
+        topbarLeft.insertBefore(button, topbarLeft.firstChild);
+        updateVisibility();
+        window.addEventListener('resize', updateVisibility);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMobileSidebarToggle);
+    } else {
+        initMobileSidebarToggle();
+    }
+
+    // ============================================================
     // API Helpers
     // ============================================================
 
