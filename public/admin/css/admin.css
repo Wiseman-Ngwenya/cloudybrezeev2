@@ -846,3 +846,29 @@
         justify-content: space-between;
     }
 }
+
+/* Mobile admin navigation button created by admin.js */
+.admin-mobile-menu-toggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .admin-mobile-menu-toggle {
+        display: flex !important;
+    }
+
+    .admin-topbar-left {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .admin-topbar-left .admin-page-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .admin-sidebar {
+        z-index: 1000;
+    }
+}
