@@ -6,6 +6,12 @@
 (function () {
     'use strict';
 
+    try {
+        if (window.localStorage && window.localStorage.getItem('cb_analytics_test_mode') === 'true') {
+            return;
+        }
+    } catch (_) {}
+
     var SUPABASE_URL = 'https://xtcumrmayetcihqmtqkx.supabase.co';
     var SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_vHvVfT1349nefV3o1a7--g_HVSPuFDT';
     var SESSION_STORAGE_KEY = 'cb_test_session_id';
