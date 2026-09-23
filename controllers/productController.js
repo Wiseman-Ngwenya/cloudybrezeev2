@@ -291,6 +291,30 @@ const addProductImage = asyncHandler(async (req, res) => {
 });
 
 /**
+ * PUT /api/admin/products/:productId/images/:imageId
+ *
+ * Update an image in a product gallery.
+ * Body: { image_url, is_primary?, sort_order? }
+ * Returns: Updated product image record
+ */
+const updateProductImage = asyncHandler(async (req, res) => {
+    const { id, imageId } = req.params;
+    const { image_url, is_primary, sort_order } = req.body;
+
+    const image = await productService.updateProductImage(
+        id,
+        imageId,
+        image_url,
+        is_primary || false,
+        sort_order
+    );
+
+    res.status(200).json(
+        successResponse(image, 'Product image updated successfully.')
+    );
+});
+
+/**
  * DELETE /api/admin/products/:productId/images/:imageId
  *
  * Remove an image from a product gallery.
@@ -380,6 +404,7 @@ module.exports = {
     deleteProduct,
     toggleProductActive,
     addProductImage,
+    updateProductImage,
     removeProductImage,
     addProductVariant,
     updateProductVariant,
