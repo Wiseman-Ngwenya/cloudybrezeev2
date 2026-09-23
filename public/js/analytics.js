@@ -18,6 +18,15 @@
     // ============================================================
     const ANALYTICS_ENDPOINT = '/api/analytics/pageview';
     const TRACKING_ENABLED = true;
+    const TEST_MODE_KEY = 'cb_analytics_test_mode';
+
+    function isAnalyticsTestMode() {
+        try {
+            return localStorage.getItem(TEST_MODE_KEY) === 'true';
+        } catch (err) {
+            return false;
+        }
+    }
 
     // ============================================================
     // User Agent Parsing
@@ -64,7 +73,7 @@
     // ============================================================
 
     function trackPageView(pageUrl) {
-        if (!TRACKING_ENABLED) return;
+        if (!TRACKING_ENABLED || isAnalyticsTestMode()) return;
 
         try {
             const page = pageUrl || window.location.pathname;
@@ -103,6 +112,7 @@
     // ============================================================
 
     function loadInterestTestTracker() {
+        if (isAnalyticsTestMode()) return;
         try {
             if (window.CloudyBreezeExperiment) return;
             if (document.querySelector('script[data-cloudybreeze-experiment="true"]')) return;
@@ -125,6 +135,7 @@
     // ============================================================
 
     function init() {
+        if (isAnalyticsTestMode()) return;
         trackPageView();
         loadInterestTestTracker();
 
