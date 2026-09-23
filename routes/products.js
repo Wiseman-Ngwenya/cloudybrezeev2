@@ -152,6 +152,17 @@ router.post(
     productController.addProductImage
 );
 
+// PUT /api/admin/products/:id/images/:imageId
+// Update an existing product gallery image
+router.put(
+    '/admin/:id/images/:imageId',
+    uuidParam('id'),
+    uuidParam('imageId'),
+    imageValidationRules,
+    handleValidationResult,
+    productController.updateProductImage
+);
+
 // DELETE /api/admin/products/:id/images/:imageId
 // Remove an image from a product gallery
 router.delete(
