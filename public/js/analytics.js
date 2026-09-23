@@ -18,6 +18,19 @@
     // ============================================================
     const ANALYTICS_ENDPOINT = '/api/analytics/pageview';
     const TRACKING_ENABLED = true;
+    const TEST_MODE_KEY = 'cb_analytics_test_mode';
+
+    /**
+     * Return true when this browser is in analytics test mode.
+     * Test mode is local to this browser and does not affect other visitors.
+     */
+    function isAnalyticsTestMode() {
+        try {
+            return localStorage.getItem(TEST_MODE_KEY) === 'true';
+        } catch (err) {
+            return false;
+        }
+    }
 
     // ============================================================
     // User Agent Parsing
@@ -87,7 +100,7 @@
      * @param {string} [pageUrl] - The page URL to track (defaults to current pathname)
      */
     function trackPageView(pageUrl) {
-        if (!TRACKING_ENABLED) return;
+        if (!TRACKING_ENABLED || isAnalyticsTestMode()) return;
 
         try {
             const page = pageUrl || window.location.pathname;
@@ -135,6 +148,8 @@
      * Track the initial page view when the script loads.
      */
     function init() {
+        if (isAnalyticsTestMode()) return;
+
         // Track the current page
         trackPageView();
 
