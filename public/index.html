@@ -283,7 +283,9 @@
             loadFeaturedProducts();
             loadCategories();
             loadStoreSettings();
-            updateCartCount();
+            if (window.CloudyBreeze && typeof window.CloudyBreeze.updateCartCount === 'function') {
+                window.CloudyBreeze.updateCartCount();
+            }
             setupNewsletterForm();
         });
 
