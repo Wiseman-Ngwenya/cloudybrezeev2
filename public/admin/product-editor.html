@@ -217,6 +217,7 @@
             var productId = null;
             var isEditMode = false;
             var originalVariantIds = {};
+            var originalGalleryImageIds = {};
 
             document.addEventListener('DOMContentLoaded', function () {
                 setAdminUserName();
@@ -392,10 +393,13 @@
             function renderGalleryImages(images) {
                 var list = document.getElementById('galleryList');
                 list.innerHTML = '';
+                originalGalleryImageIds = {};
                 images.forEach(function (img) {
                     var template = document.getElementById('galleryItemTemplate');
                     var clone = template.content.cloneNode(true);
                     var item = clone.firstElementChild;
+                    item.dataset.imageId = img.id || '';
+                    if (img.id) originalGalleryImageIds[img.id] = true;
                     item.querySelector('.gallery-url-input').value = img.image_url || '';
                     if (img.image_url) {
                         item.querySelector('.admin-gallery-preview').innerHTML = '<img src="' + img.image_url + '" alt="Gallery">';
@@ -437,16 +441,70 @@
 
             function saveGalleryImages(productId) {
                 var items = document.getElementById('galleryList').querySelectorAll('.admin-gallery-item');
+                var currentImageIds = {};
                 var promises = [];
+
                 items.forEach(function (item) {
                     var url = item.querySelector('.gallery-url-input').value;
-                    if (url) {
+                    if (!url) return;
+
+                    var imageId = item.dataset.imageId || '';
+                    var payload = { image_url: url };
+
+                    if (imageId) {
+                        currentImageIds[imageId] = true;
                         promises.push(
-                            window.CloudyBreezeAdmin.apiPost('/api/products/admin/' + productId + '/images', { image_url: url })
+                            window.CloudyBreezeAdmin.apiPut(
+                                '/api/products/admin/' + productId + '/images/' + imageId,
+                                payload
+                            )
+                        );
+                    } else {
+                        promises.push(
+                            window.CloudyBreezeAdmin.apiPost(
+                                '/api/products/admin/' + productId + '/images',
+                                payload
+                            )
                         );
                     }
                 });
-                return Promise.all(promises).catch(function () {});
+
+                return Promise.all(promises).then(function (results) {
+                    var failed = results.find(function (result) {
+                        return !result || !result.success;
+                    });
+
+                    if (failed) {
+                        var message = failed.error && failed.error.message
+                            ? failed.error.message
+                            : 'Failed to save one or more gallery images.';
+                        throw new Error(message);
+                    }
+
+                    var deletionPromises = [];
+                    Object.keys(originalGalleryImageIds).forEach(function (imageId) {
+                        if (!currentImageIds[imageId]) {
+                            deletionPromises.push(
+                                window.CloudyBreezeAdmin.apiDelete(
+                                    '/api/products/admin/' + productId + '/images/' + imageId
+                                )
+                            );
+                        }
+                    });
+
+                    return Promise.all(deletionPromises).then(function (deleteResults) {
+                        var deleteFailed = deleteResults.find(function (result) {
+                            return !result || !result.success;
+                        });
+
+                        if (deleteFailed) {
+                            var deleteMessage = deleteFailed.error && deleteFailed.error.message
+                                ? deleteFailed.error.message
+                                : 'Failed to remove one or more deleted gallery images.';
+                            throw new Error(deleteMessage);
+                        }
+                    });
+                });
             }
 
             // --- Variants ---
