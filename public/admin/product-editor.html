@@ -216,6 +216,7 @@
 
             var productId = null;
             var isEditMode = false;
+            var originalVariantIds = {};
 
             document.addEventListener('DOMContentLoaded', function () {
                 setAdminUserName();
@@ -324,9 +325,14 @@
                         // Save gallery images
                         saveGalleryImages(saved.id).then(function () {
                             // Save variants
-                            saveVariants(saved.id).then(function () {
-                                window.location.href = '/admin/products.html';
-                            });
+                            return saveVariants(saved.id);
+                        }).then(function () {
+                            window.location.href = '/admin/products.html';
+                        }).catch(function (err) {
+                            console.error('Product media/variant save error:', err);
+                            showMessage(err && err.message ? err.message : 'Failed to save product variants.', 'error');
+                            btn.disabled = false;
+                            btn.textContent = 'Save Product';
                         });
                     })
                     .catch(function (err) {
@@ -447,10 +453,13 @@
             function renderVariants(variants) {
                 var list = document.getElementById('variantsList');
                 list.innerHTML = '';
+                originalVariantIds = {};
                 variants.forEach(function (v) {
                     var template = document.getElementById('variantTemplate');
                     var clone = template.content.cloneNode(true);
                     var item = clone.firstElementChild;
+                    item.dataset.variantId = v.id || '';
+                    if (v.id) originalVariantIds[v.id] = true;
                     item.querySelector('.variant-name-input').value = v.variation_name || '';
                     item.querySelector('.variant-sku-input').value = v.sku || '';
                     item.querySelector('.variant-price-input').value = v.price_adjustment || 0;
@@ -490,20 +499,76 @@
 
             function saveVariants(productId) {
                 var items = document.getElementById('variantsList').querySelectorAll('.admin-variant-item');
+                var currentVariantIds = {};
                 var promises = [];
+
                 items.forEach(function (item) {
                     var name = item.querySelector('.variant-name-input').value.trim();
                     if (!name) return;
-                    promises.push(
-                        window.CloudyBreezeAdmin.apiPost('/api/products/admin/' + productId + '/variants', {
-                            variation_name: name,
-                            sku: item.querySelector('.variant-sku-input').value.trim() || null,
-                            price_adjustment: parseFloat(item.querySelector('.variant-price-input').value) || 0,
-                            image_url: item.querySelector('.variant-url-input').value || null,
-                        })
-                    );
+
+                    var variantId = item.dataset.variantId || '';
+                    var payload = {
+                        variation_name: name,
+                        sku: item.querySelector('.variant-sku-input').value.trim() || null,
+                        price_adjustment: parseFloat(item.querySelector('.variant-price-input').value) || 0,
+                        image_url: item.querySelector('.variant-url-input').value || null,
+                    };
+
+                    if (variantId) {
+                        currentVariantIds[variantId] = true;
+                        promises.push(
+                            window.CloudyBreezeAdmin.apiPut(
+                                '/api/products/admin/' + productId + '/variants/' + variantId,
+                                payload
+                            )
+                        );
+                    } else {
+                        promises.push(
+                            window.CloudyBreezeAdmin.apiPost(
+                                '/api/products/admin/' + productId + '/variants',
+                                payload
+                            )
+                        );
+                    }
                 });
-                return Promise.all(promises).catch(function () {});
+
+                return Promise.all(promises).then(function (results) {
+                    var failed = results.find(function (result) {
+                        return !result || !result.success;
+                    });
+
+                    if (failed) {
+                        var message = failed.error && failed.error.message
+                            ? failed.error.message
+                            : 'Failed to save one or more variants.';
+                        throw new Error(message);
+                    }
+
+                    // Delete variants that existed when the product was loaded but
+                    // have since been removed from the editor.
+                    var deletionPromises = [];
+                    Object.keys(originalVariantIds).forEach(function (variantId) {
+                        if (!currentVariantIds[variantId]) {
+                            deletionPromises.push(
+                                window.CloudyBreezeAdmin.apiDelete(
+                                    '/api/products/admin/' + productId + '/variants/' + variantId
+                                )
+                            );
+                        }
+                    });
+
+                    return Promise.all(deletionPromises).then(function (deleteResults) {
+                        var deleteFailed = deleteResults.find(function (result) {
+                            return !result || !result.success;
+                        });
+                        if (deleteFailed) {
+                            var deleteMessage = deleteFailed.error && deleteFailed.error.message
+                                ? deleteFailed.error.message
+                                : 'Failed to remove one or more deleted variants.';
+                            throw new Error(deleteMessage);
+                        }
+                    });
+                });
             }
 
             function showMessage(msg, type) {
