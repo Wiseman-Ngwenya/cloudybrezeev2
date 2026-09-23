@@ -604,6 +604,64 @@ async function addProductImage(productId, imageUrl, isPrimary = false, sortOrder
 }
 
 /**
+ * Update an existing image in a product gallery.
+ *
+ * @param {string} productId - Product UUID
+ * @param {string} imageId - Product image UUID
+ * @param {string} imageUrl - New image URL
+ * @param {boolean} [isPrimary=false] - Set as primary image
+ * @param {number} [sortOrder] - Display order
+ * @returns {Promise<Object>} Updated product image record
+ */
+async function updateProductImage(productId, imageId, imageUrl, isPrimary = false, sortOrder = null) {
+    await adminGetProductById(productId);
+
+    const { data: existingImage, error: findError } = await serviceClient
+        .from('product_images')
+        .select('id, product_id, sort_order')
+        .eq('id', imageId)
+        .eq('product_id', productId)
+        .single();
+
+    if (findError || !existingImage) {
+        throw new NotFoundError('Product image not found.');
+    }
+
+    if (isPrimary) {
+        await serviceClient
+            .from('product_images')
+            .update({ is_primary: false })
+            .eq('product_id', productId)
+            .eq('is_primary', true)
+            .neq('id', imageId);
+    }
+
+    const updates = {
+        image_url: imageUrl,
+        is_primary: isPrimary,
+    };
+
+    if (sortOrder !== null && sortOrder !== undefined) {
+        updates.sort_order = sortOrder;
+    }
+
+    const { data, error } = await serviceClient
+        .from('product_images')
+        .update(updates)
+        .eq('id', imageId)
+        .eq('product_id', productId)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error updating product image:', error);
+        throw error;
+    }
+
+    return data;
+}
+
+/**
  * Remove an image from a product gallery.
  *
  * @param {string} imageId - Product image UUID
@@ -852,6 +910,7 @@ module.exports = {
     deleteProduct,
     toggleProductActive,
     addProductImage,
+    updateProductImage,
     removeProductImage,
     addProductVariant,
     updateProductVariant,
