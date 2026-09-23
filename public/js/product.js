@@ -23,6 +23,15 @@
     var productViewTracked = false;
 
     var ANALYTICS_SESSION_KEY = 'cloudyBreezeAnalyticsSessionId';
+    var ANALYTICS_TEST_MODE_KEY = 'cb_analytics_test_mode';
+
+    function isAnalyticsTestMode() {
+        try {
+            return localStorage.getItem(ANALYTICS_TEST_MODE_KEY) === 'true';
+        } catch (err) {
+            return false;
+        }
+    }
 
     var productLoading = document.getElementById('productLoading');
     var productError = document.getElementById('productError');
@@ -110,7 +119,7 @@
     }
 
     function trackProductViewOnce() {
-        if (productViewTracked || !product || !product.id) return;
+        if (isAnalyticsTestMode() || productViewTracked || !product || !product.id) return;
         productViewTracked = true;
 
         var payload = {
